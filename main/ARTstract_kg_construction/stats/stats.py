@@ -1,7 +1,6 @@
 import json
 import matplotlib
 matplotlib.use('Agg')
-import matplotlib.pyplot as plt
 import numpy as np
 import matplotlib.pyplot as plt
 import itertools
@@ -10,8 +9,9 @@ import networkx as nx
 from matplotlib import cm
 from wordcloud import WordCloud
 plt.interactive(False)
-
-
+import math
+from wordcloud import WordCloud, get_single_color_func
+import matplotlib.pyplot as plt
 
 def load_inputs(ACs_list_name):
     with open(f"../input/{ACs_list_name}.json", "r") as file:
@@ -269,9 +269,11 @@ def stats_num_detected_objects(dataset_colors, concept_colors, AC_list_names):
 
         print(average_num_detected_objects_by_concept)
 
-def stats_detected_objects(ACs_list_name):
+def stats_detected_objects(ACs_list_names):
     def get_detected_objects_by_image(ACs_list_name):
         concept_images, merged_ARTstract = load_inputs(ACs_list_name)
+        for concept, list in concept_images.items():
+            print(concept, "has these many images ", len(list))
         detected_objects_by_concept = {concept: [] for concept in concept_images}
         for concept, images in concept_images.items():
             for img in images:
@@ -296,34 +298,6 @@ def stats_detected_objects(ACs_list_name):
 
         all_object_frequencies = Counter(all_detected_objects)
         return object_frequencies_by_concept, all_object_frequencies
-
-    # def plot_object_frequencies(object_frequencies_by_concept):
-    #     num_concepts = len(object_frequencies_by_concept)
-    #     fig, axs = plt.subplots(num_concepts, 1, figsize=(8, 4 * num_concepts), sharex=True)
-    #
-    #     for i, (concept, object_frequencies) in enumerate(object_frequencies_by_concept.items()):
-    #         sorted_frequencies = sorted(object_frequencies.items(), key=lambda x: x[1], reverse=True)
-    #         objects, frequencies = zip(*sorted_frequencies[1:15])
-    #         axs[i].bar(objects, frequencies)
-    #         axs[i].set_title(f"Detected Objects for Concept '{concept}'")
-    #
-    #         # Set x-axis labels and rotation
-    #         if i == num_concepts - 1:
-    #             axs[i].tick_params(axis='x', rotation=45, labelsize=8)
-    #         else:
-    #             axs[i].tick_params(axis='x', labelsize=8)
-    #
-    #     # Adjust space between subplots to avoid overlapping labels
-    #     plt.tight_layout()
-    #     plt.show()
-    #
-    #     # Save the plot as an image
-    #     plt.savefig("attempt.jpg")
-    #
-    #     # Show the plot (optional, you can comment this line out if you don't want to display the plot in the PyCharm's plot viewer)
-    #     plt.show()
-
-    import matplotlib.pyplot as plt
 
     def plot_object_frequencies(object_frequencies_by_concept):
         num_concepts = len(object_frequencies_by_concept)
@@ -354,16 +328,34 @@ def stats_detected_objects(ACs_list_name):
 
         plt.tight_layout()
         plt.show()
+
         # Save the plot as an image
-        plt.savefig("attempt.jpg")
+        save_filename = f"output_imgs/top_30_{ACs_list_name}.jpg"
+        plt.savefig(save_filename)
 
         # Show the plot (optional, you can comment this line out if you don't want to display the plot in the PyCharm's plot viewer)
         plt.show()
 
     def find_common_objects(object_frequencies_by_concept):
-        # returns objects that are present in every concept
-        common_objects = set.intersection(*[set(frequencies.keys()) for frequencies in object_frequencies_by_concept.values()])
-        return common_objects
+        # Calculate overall frequency of each object across all concepts
+        all_object_frequencies = {}
+        for object_frequencies in object_frequencies_by_concept.values():
+            for obj, freq in object_frequencies.items():
+                all_object_frequencies[obj] = all_object_frequencies.get(obj, 0) + freq
+
+        # Sort objects based on their overall frequency in descending order
+        sorted_overall_frequencies = sorted(all_object_frequencies.items(), key=lambda x: x[1], reverse=True)
+        ordered_objects = [obj for obj, freq in sorted_overall_frequencies]
+
+        # Get the set of common objects that are present in every concept
+        common_objects = set.intersection(
+            *[set(frequencies.keys()) for frequencies in object_frequencies_by_concept.values()])
+
+        # Return the ordered set of common objects
+        ordered_common_objects = [obj for obj in ordered_objects if obj in common_objects]
+        # common_objects = find_common_objects(object_frequencies_by_concept)
+        print("for all concepts, the most common objects are (from most common to least: ", common_objects)
+        return ordered_common_objects
 
     def find_unique_objects(object_frequencies_by_concept):
         unique_objects_by_concept = {concept: set(frequencies.keys()) for concept, frequencies in
@@ -372,9 +364,64 @@ def stats_detected_objects(ACs_list_name):
             for other_concept, other_frequencies in object_frequencies_by_concept.items():
                 if concept != other_concept:
                     unique_objects_by_concept[concept] -= set(other_frequencies.keys())
+
+        for concept, od_set in unique_objects_by_concept.items():
+            if len(od_set) == 0:
+                print(concept, "is the only one with detected objects: ", od_set)
+            else:
+                print(concept, "does not have any unique detected object")
+
         return unique_objects_by_concept
 
-    def find_top_objects(object_frequencies_by_concept, num_top_objects=31):
+    def find_relevant_objects(object_frequencies_by_concept):
+        # Calculate overall frequency of each object across all concepts
+        all_object_frequencies = Counter()
+        for object_frequencies in object_frequencies_by_concept.values():
+            all_object_frequencies.update(object_frequencies)
+
+        relevant_objects_by_concept = {}
+
+        for concept, object_frequencies in object_frequencies_by_concept.items():
+            # Calculate relative frequency (TF) for each object within the concept
+            relative_frequencies = {
+                obj: freq / all_object_frequencies[obj]
+                for obj, freq in object_frequencies.items()
+            }
+
+            # Calculate inverse concept frequency (IDF) for each object
+            num_concepts = len(object_frequencies_by_concept)
+            inverse_concept_frequency = {obj: num_concepts / sum(
+                1 for concept_freqs in object_frequencies_by_concept.values() if obj in concept_freqs)
+                                         for obj in object_frequencies}
+
+            # Calculate relevance score for each object in the concept (TF * IDF)
+            relevance_scores = {obj: round(relative_frequencies[obj] * inverse_concept_frequency[obj], 3)
+                                for obj in object_frequencies}
+
+            # Sort objects based on their relevance scores in descending order
+            sorted_relevance_scores = sorted(relevance_scores.items(), key=lambda x: x[1], reverse=True)
+
+            # Keep only the objects unique to the current concept's top 10 objects
+            top_10_objects = [obj for obj, score in sorted_relevance_scores[:15]]
+
+            # Check if each object appears in only the current concept's top 10 list
+            unique_top_10_objects = []
+            for obj in top_10_objects:
+                unique_to_current_concept = True
+                for other_concept, other_top_10 in relevant_objects_by_concept.items():
+                    if other_concept != concept and obj in other_top_10:
+                        unique_to_current_concept = False
+                        break
+                if unique_to_current_concept:
+                    unique_top_10_objects.append(obj)
+
+            relevant_objects_by_concept[concept] = unique_top_10_objects
+        print(relevant_objects_by_concept)
+        for concept, od_set in relevant_objects_by_concept.items():
+            print(concept, "has relevant concepts: ", od_set)
+        return relevant_objects_by_concept
+
+    def find_top_objects(object_frequencies_by_concept, num_top_objects=15):
         top_objects_by_concept = {}
         for concept, frequencies in object_frequencies_by_concept.items():
             total_detected_objects = sum(frequencies.values())
@@ -384,79 +431,152 @@ def stats_detected_objects(ACs_list_name):
             sorted_objects = sorted(objects_percentages.items(), key=lambda x: x[1], reverse=True)
             top_objects = dict(sorted_objects[:num_top_objects])
             top_objects_by_concept[concept] = top_objects
+        print("Top objects by concept: ", top_objects_by_concept)
+        ordered_lists_by_concept = {}
+        for concept, object_scores in top_objects_by_concept.items():
+            # Sort objects based on their scores in descending order
+            sorted_objects = sorted(object_scores.items(), key=lambda x: x[1], reverse=True)
+            # Extract the objects from the sorted list
+            ordered_objects = [obj for obj, score in sorted_objects]
+            ordered_lists_by_concept[concept] = ordered_objects
+        for concept, od_set in ordered_lists_by_concept.items():
+            print(concept, "has top concepts: ", od_set)
         return top_objects_by_concept
+    def find_top_relevant_objects(top_objects_by_concept, relevant_objects_by_concept, k=15):
+        top_relevant_objects_by_concept = {}
 
-    def visualize_top_objects(top_objects_by_concept):
+        for concept, top_concepts in top_objects_by_concept.items():
+            # Get the relevant concepts for the current concept
+            relevant_concepts = relevant_objects_by_concept.get(concept, [])
+            # Calculate the relevance scores for the relevant concepts
+            relevance_scores = {obj: 1 for obj in relevant_concepts}
+            # Convert top_concepts dictionary to a list of tuples (object, score)
+            top_concepts_list = list(top_concepts.items())
+            # Sort the top_concepts_list based on scores in descending order
+            top_concepts_list.sort(key=lambda x: x[1], reverse=True)
+            # Extract the objects from the sorted list
+            top_concepts_sorted = [obj for obj, _ in top_concepts_list]
+            # Ensure all objects in top_concepts_sorted have scores in relevance_scores dictionary
+            relevance_scores.update({obj: 0 for obj in top_concepts_sorted if obj not in relevance_scores})
+            # Calculate the Jaccard similarity between the top concepts and relevant concepts
+            jaccard_scores = {obj: len(set([obj]).intersection(set(top_concepts_sorted))) / len(
+                set([obj]).union(set(top_concepts_sorted))) for obj in relevant_concepts}
+            # Sort objects based on Jaccard similarity scores in descending order
+            sorted_objects = sorted(jaccard_scores.items(), key=lambda x: x[1], reverse=True)
+            # Take only the top k relevant concepts
+            top_relevant_objects_by_concept[concept] = [obj for obj, _ in sorted_objects[:k]]
+            # Print the top relevant concepts
+        for concept, concepts in top_relevant_objects_by_concept.items():
+            print(concept, "has top relevant concepts:", concepts)
+        print(top_relevant_objects_by_concept)
+        return top_relevant_objects_by_concept
+
+    def find_top_relevant_objects_by_concept_w_freqs(top_relevant_objects_by_concept, object_frequencies_by_concept):
+        top_relevant_objects_by_concept_w_freqs = {}
+
+        for concept, top_relevant_objects in top_relevant_objects_by_concept.items():
+            # Get the object frequencies for the current concept
+            object_frequencies = object_frequencies_by_concept.get(concept, {})
+
+            # Fetch frequencies for top relevant objects and create a dictionary {object: frequency}
+            objects_with_freqs = {obj: object_frequencies.get(obj, 0) for obj in top_relevant_objects}
+
+            # Store the dictionary {object: frequency} for the current concept
+            top_relevant_objects_by_concept_w_freqs[concept] = objects_with_freqs
+
+        # Print the top relevant concepts and their frequencies
+        for concept, concepts in top_relevant_objects_by_concept_w_freqs.items():
+            print(concept, "has top relevant concepts and frequencies:", concepts)
+
+        return top_relevant_objects_by_concept_w_freqs
+
+    def create_concepts_wordclouds(top_objects_by_concept, top_relevant_objects_by_concept_w_freqs):
+        class GroupedColorFunc(object):
+            def __init__(self, color_to_words, default_color):
+                self.color_func_to_words = [
+                    (get_single_color_func(color), set(words))
+                    for (color, words) in color_to_words.items()]
+
+                self.default_color_func = get_single_color_func(default_color)
+
+            def get_color_func(self, word):
+                """Returns a single_color_func associated with the word"""
+                try:
+                    color_func = next(
+                        color_func for (color_func, words) in self.color_func_to_words
+                        if word in words)
+                except StopIteration:
+                    color_func = self.default_color_func
+
+                return color_func
+
+            def __call__(self, word, **kwargs):
+                return self.get_color_func(word)(word, **kwargs)
+
+        font_color = '#0074D9'  # Use any shade of blue you prefer
+        helvetica_font = 'Helvetica.ttf'  # Replace with the path to your Helvetica font file
+
+        # Remove "person" from top_objects_by_concept and top_relevant_objects_by_concept
+        for top_objects in top_objects_by_concept.values():
+            top_objects.pop('person', None)
+
+        for top_relevant_objects in top_relevant_objects_by_concept_w_freqs.values():
+            if 'person' in top_relevant_objects:
+                top_relevant_objects.remove('person')
+
+        # Generate word clouds for each concept
         for concept, top_objects in top_objects_by_concept.items():
-            # Create a word cloud for each concept
-            wordcloud = WordCloud(width=800, height=400, background_color='white').generate_from_frequencies(
-                top_objects)
+            # Create word cloud objects
+            wc_top_objects = WordCloud(
+                collocations=False,
+                background_color='white',
+                font_path=helvetica_font,  # Set the font to Helvetica
+                color_func=lambda *args, **kwargs: font_color  # Set all words to blue color
+            ).generate_from_frequencies(top_objects)
 
-            # Plot the word cloud
-            plt.figure(figsize=(10, 5))
-            plt.imshow(wordcloud, interpolation='bilinear')
-            plt.axis('off')
-            plt.title(f"Top Objects for Concept: {concept}")
+            # Get the top relevant objects for the current concept
+            top_relevant_objects = top_relevant_objects_by_concept_w_freqs.get(concept, {})
+            top_relevant_objects = top_relevant_objects_by_concept_w_freqs.get(concept, {})
+            wc_top_relevant_objects = WordCloud(
+                collocations=False,
+                background_color='white',
+                font_path=helvetica_font,  # Set the font to Helvetica
+                color_func=lambda *args, **kwargs: font_color  # Set all words to blue color
+            ).generate_from_frequencies(top_relevant_objects)
+
+            # Plot the word clouds side by side
+            fig, axes = plt.subplots(1, 2, figsize=(12, 6))
+
+            axes[0].imshow(wc_top_objects, interpolation="bilinear")
+            axes[0].axis("off")
+            axes[0].set_title(f"Top Objects for Concept: {concept}")
+
+            axes[1].imshow(wc_top_relevant_objects, interpolation="bilinear")
+            axes[1].axis("off")
+            axes[1].set_title(f"Top Relevant Objects for Concept: {concept}")
+
             plt.show()
-
-            # Create a bar chart for the top objects
-            plt.figure(figsize=(10, 5))
-            plt.bar(top_objects.keys(), top_objects.values())
-            plt.xticks(rotation=45, ha='right')
-            plt.ylabel("Percentage")
-            plt.title(f"Top Objects for Concept: {concept}")
-            plt.tight_layout()
-            save_filename = f'{concept}_wordcloud.jpg'
+            # Save the plot as an image
+            save_filename = f"{concept}_{ACs_list_name}_object_wordcloud.jpg"
             plt.savefig(save_filename)
             plt.show()
 
+        return
 
-    def find_object_correlations(detected_objects_by_concept):
-        object_combinations = itertools.combinations(detected_objects_by_concept.values(), 2)
-        object_correlations = {}
 
-        for obj_set1, obj_set2 in object_combinations:
-            common_objects = set.intersection(set(obj_set1), set(obj_set2))
-            for obj in common_objects:
-                if obj not in object_correlations:
-                    object_correlations[obj] = []
-                object_correlations[obj].append(1)
 
-        return object_correlations
+    for ACs_list_name in ACs_list_names:
+        # EXECUTION
+        detected_objects_by_concept = get_detected_objects_by_image(ACs_list_name)
+        object_frequencies_by_concept, all_object_frequencies = calculate_object_frequencies(
+            detected_objects_by_concept)
+        plot_object_frequencies(object_frequencies_by_concept)
+        relevant_objects_by_concept = find_relevant_objects(object_frequencies_by_concept)
+        top_objects_by_concept = find_top_objects(object_frequencies_by_concept)
+        top_relevant_objects_by_concept = find_top_relevant_objects(top_objects_by_concept, relevant_objects_by_concept)
+        top_relevant_objects_by_concept_w_freqs = find_top_relevant_objects_by_concept_w_freqs(top_relevant_objects_by_concept, object_frequencies_by_concept)
+        concepts_wordclouds = create_concepts_wordclouds(top_objects_by_concept, top_relevant_objects_by_concept_w_freqs)
 
-    def create_object_cooccurrence_network(detected_objects_by_concept):
-        G = nx.Graph()
-        for concept, detected_objects in detected_objects_by_concept.items():
-            G.add_nodes_from(detected_objects)
-            for obj1, obj2 in itertools.combinations(detected_objects, 2):
-                if G.has_edge(obj1, obj2):
-                    G[obj1][obj2]['weight'] += 1
-                else:
-                    G.add_edge(obj1, obj2, weight=1)
-
-        return G
-
-    def conduct_statistical_comparisons(detected_objects_by_concept):
-        # Add your statistical comparison code here
-        pass
-
-    detected_objects_by_concept= get_detected_objects_by_image(ACs_list_name)
-    object_frequencies_by_concept, all_object_frequencies = calculate_object_frequencies(detected_objects_by_concept)
-    plot_object_frequencies(object_frequencies_by_concept)
-    #
-    # common_objects = find_common_objects(object_frequencies_by_concept)
-    # # print("for all concepts, the most common objects are: ", common_objects)
-    # unique_objects_by_concept = find_unique_objects(object_frequencies_by_concept)
-    # print(unique_objects_by_concept)
-    # top_objects = find_top_objects(object_frequencies_by_concept)
-    # visualize_top_objects(top_objects)
-    # print(top_objects)
-    # object_correlations = find_object_correlations(detected_objects_by_concept)
-    # object_cooccurrence_network = create_object_cooccurrence_network(detected_objects_by_concept)
-    #
-    # conduct_statistical_comparisons(detected_objects_by_concept)
-
-    # return common_objects, unique_objects_by_concept, object_correlations, object_cooccurrence_network
     return
 
 
@@ -464,16 +584,15 @@ def stats_detected_objects(ACs_list_name):
 # Execution examples
 dataset_colors = ['#00BFFF', '#FF6F61', '#9370DB', '#2E8B57']
 concept_colors = ['#1f77b4', '#ff7f0e', '#2ca02c', '#d62728', '#9467bd', '#8c564b', '#e377c2']
-ACs_list_names = ["ARTstract_ACs_lists", "Balanced_ARTstract_ACs_lists"]
+ACs_list_names = ["Balanced_ARTstract_ACs_lists"]
+# ACs_list_names = ["ARTstract_ACs_lists", "Balanced_ARTstract_ACs_lists"]
 
-# Call the function
+# Call the functions
 # stats_concept_frequencies(dataset_colors, concept_colors, ACs_list_names)
 # stats_evocation_strengths(dataset_colors, concept_colors, ACs_list_names)
 # stats_num_detected_objects(dataset_colors, concept_colors, ACs_list_names)
 # stats_detected_objects(dataset_colors, concept_colors, ACs_list_names)
-
-AC_list_name = "Balanced_ARTstract_ACs_lists"
-stats_detected_objects(AC_list_name)
+stats_detected_objects(ACs_list_names)
 
 
 
