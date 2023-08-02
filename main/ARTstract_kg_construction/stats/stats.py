@@ -1,17 +1,23 @@
 import json
 import matplotlib
-matplotlib.use('Agg')
+# matplotlib.use('Agg')
 import numpy as np
 import matplotlib.pyplot as plt
 import itertools
 from collections import Counter
 import networkx as nx
-from matplotlib import cm
-from wordcloud import WordCloud
 plt.interactive(False)
-import math
 from wordcloud import WordCloud, get_single_color_func
 import matplotlib.pyplot as plt
+import networkx as nx
+import itertools
+import matplotlib.pyplot as plt
+import numpy as np
+import seaborn as sns
+import pandas as pd
+import matplotlib.pyplot as plt
+import seaborn as sns
+
 
 def load_inputs(ACs_list_name):
     with open(f"../input/{ACs_list_name}.json", "r") as file:
@@ -270,7 +276,7 @@ def stats_num_detected_objects(dataset_colors, concept_colors, AC_list_names):
         print(average_num_detected_objects_by_concept)
 
 def stats_detected_objects(ACs_list_names):
-    def get_detected_objects_by_image(ACs_list_name):
+    def get_detected_objects_by_concept(ACs_list_name):
         concept_images, merged_ARTstract = load_inputs(ACs_list_name)
         for concept, list in concept_images.items():
             print(concept, "has these many images ", len(list))
@@ -563,27 +569,238 @@ def stats_detected_objects(ACs_list_names):
 
         return
 
+    def find_object_correlations(detected_objects_by_concept):
+        print(detected_objects_by_concept)
+        object_combinations = itertools.combinations(detected_objects_by_concept.values(), 2)
+        print(object_combinations)
+        object_correlations = {}
 
+        for obj_set1, obj_set2 in object_combinations:
+            common_objects = set.intersection(set(obj_set1), set(obj_set2))
+            for obj in common_objects:
+                if obj not in object_correlations:
+                    object_correlations[obj] = []
+                object_correlations[obj].append(1)
+        print(object_correlations)
+        return object_correlations
+
+    def create_object_cooccurrence_network(detected_objects_by_concept):
+        def visualize_graph(G):
+            # Draw the graph with improved parameters for readability
+            pos = nx.spring_layout(G, seed=42)
+            plt.figure(figsize=(12, 10))
+            nx.draw(G, pos, with_labels=True, node_size=800, node_color='skyblue', font_size=10, width=1.5,
+                    edge_color='gray', alpha=0.7)
+            plt.title("Object Co-occurrence Network", fontsize=16)
+            plt.show()
+
+        def visualize_heatmap(adjacency_matrix):
+            plt.figure(figsize=(10, 8))
+            sns.heatmap(adjacency_matrix, cmap='YlGnBu', linewidths=0.5, annot=True, fmt='d')
+            plt.title("Object Co-occurrence Heatmap", fontsize=16)
+            plt.xlabel("Objects")
+            plt.ylabel("Objects")
+            plt.show()
+
+        # Visualize the heatmap
+        G = nx.Graph()
+        for concept, detected_objects in detected_objects_by_concept.items():
+            G.add_nodes_from(detected_objects)
+            for obj1, obj2 in itertools.combinations(detected_objects, 2):
+                if G.has_edge(obj1, obj2):
+                    G[obj1][obj2]['weight'] += 1
+                else:
+                    G.add_edge(obj1, obj2, weight=1)
+
+        # Convert the graph to an adjacency matrix
+        adjacency_matrix = nx.linalg.graphmatrix.adjacency_matrix(G, weight='weight').toarray()
+        visualize_graph(G)
+        visualize_heatmap(adjacency_matrix)
+
+        print(adjacency_matrix)
+        return G, adjacency_matrix
+
+    def heatmap_concepts(detected_objects_by_concept):
+        # Count the occurrences of each object in the entire dataset
+        all_objects = [obj for obj_list in detected_objects_by_concept.values() for obj in obj_list]
+        object_counts = Counter(all_objects)
+
+        # Create a DataFrame from the object counts
+        heatmap_data = pd.DataFrame([object_counts], index=['Count'])
+
+        # Plot the heatmap using Seaborn
+        plt.figure(figsize=(12, 8))
+        sns.heatmap(heatmap_data, cmap='YlGnBu', annot=True, fmt='d', cbar=False)
+        plt.xlabel('Concepts')
+        plt.ylabel('Objects')
+        plt.title('Heatmap of Detected Objects by Concept')
+        plt.xticks(rotation=45, ha='right')
+        plt.show()
+        return
 
     for ACs_list_name in ACs_list_names:
         # EXECUTION
-        detected_objects_by_concept = get_detected_objects_by_image(ACs_list_name)
+        detected_objects_by_concept = get_detected_objects_by_concept(ACs_list_name)
         object_frequencies_by_concept, all_object_frequencies = calculate_object_frequencies(
             detected_objects_by_concept)
-        plot_object_frequencies(object_frequencies_by_concept)
-        relevant_objects_by_concept = find_relevant_objects(object_frequencies_by_concept)
-        top_objects_by_concept = find_top_objects(object_frequencies_by_concept)
-        top_relevant_objects_by_concept = find_top_relevant_objects(top_objects_by_concept, relevant_objects_by_concept)
-        top_relevant_objects_by_concept_w_freqs = find_top_relevant_objects_by_concept_w_freqs(top_relevant_objects_by_concept, object_frequencies_by_concept)
-        concepts_wordclouds = create_concepts_wordclouds(top_objects_by_concept, top_relevant_objects_by_concept_w_freqs)
+        #plot_object_frequencies(object_frequencies_by_concept)
+        #common_objects = find_common_objects(object_frequencies_by_concept)
+        #relevant_objects_by_concept = find_relevant_objects(object_frequencies_by_concept)
+        #top_objects_by_concept = find_top_objects(object_frequencies_by_concept)
+        #top_relevant_objects_by_concept = find_top_relevant_objects(top_objects_by_concept, relevant_objects_by_concept)
+        #top_relevant_objects_by_concept_w_freqs = find_top_relevant_objects_by_concept_w_freqs(top_relevant_objects_by_concept, object_frequencies_by_concept)
+        #concepts_wordclouds = create_concepts_wordclouds(top_objects_by_concept, top_relevant_objects_by_concept_w_freqs)
 
+        # find_object_correlations(detected_objects_by_concept)
+
+        # object_correlations = find_object_correlations(detected_objects_by_concept)
+        # object_cooccurrence_network = create_object_cooccurrence_network(detected_objects_by_concept)
+        heatmap_concepts(detected_objects_by_concept)
     return
 
+def co_occurence_heatmaps(ACs_list_name, concept_of_interest):
+    def create_co_occurrence_matrix(concept_detected_objects):
+        # Flatten the list of lists to get all detected object names
+        all_object_names = [obj_name for sublist in concept_detected_objects for obj_name in sublist]
 
+        # Extract unique object names from the flattened list and sort alphabetically
+        object_names = sorted(list(set(all_object_names)))
+        print('object names is a list ', object_names)
+
+        # Initialize an empty co-occurrence matrix
+        num_objects = len(object_names)
+        co_occurrence_matrix = np.zeros((num_objects, num_objects), dtype=int)
+        print('initial cooccr matrix', co_occurrence_matrix)
+
+        # Create a dictionary to map object names to matrix indices
+        object_to_index = {obj_name: index for index, obj_name in enumerate(object_names)}
+
+        # Populate the co-occurrence matrix based on the flattened list
+        for detected_objects in concept_detected_objects:
+            for obj_name in detected_objects:
+                for other_obj_name in detected_objects:
+                    if obj_name != other_obj_name:
+                        # Increase the count for co-occurrence of obj_name and other_obj_name
+                        i, j = object_to_index[obj_name], object_to_index[other_obj_name]
+                        co_occurrence_matrix[i, j] += 1
+
+        print('updated cooccur matrix', co_occurrence_matrix)
+        return co_occurrence_matrix, object_names
+
+    def create_heatmap(concept_name, co_occurrence_matrix, object_names):
+        # Create a heatmap using seaborn
+        plt.figure(figsize=(12, 10))
+        sns.heatmap(co_occurrence_matrix, annot=False, fmt='d', cmap="YlGnBu", xticklabels=object_names,
+                    yticklabels=object_names, cbar=True, cbar_kws={"label": "Co-occurrence count"})
+        plt.title(f"Co-occurrence Heatmap for Concept: {concept_name}")
+        plt.xlabel("Detected Objects")
+        plt.ylabel("Detected Objects")
+        plt.show()
+
+    def set_occurrence_heatmaps(ACs_list_name, concept_of_interest):
+        concept_detected_objects = []
+        concept_images, merged_ARTstract = load_inputs(ACs_list_name)
+        for img_id, image_info in merged_ARTstract.items():
+            concept_name = None
+            detected_objects = None
+
+            # Find the concept_name and detected_objects dynamically
+            for key, value in image_info['evoked_clusters'].items():
+                if value.get('cluster_name') == concept_of_interest:
+                    # print('found an image that evokes', concept_of_interest)
+                    concept_name = value['cluster_name']
+                    detected_objects_list = image_info['od'].get("ARTstract_od_2023_06_28", {}).get("detected_objects",
+                                                                                                    [])
+                    detected_objects = [detected_object["detected_object"] for detected_object in
+                                        detected_objects_list]
+                    # print('found an image that evokes', concept_of_interest, 'with objects', detected_objects)
+            if concept_name and detected_objects:
+                concept_detected_objects.append(detected_objects)
+                # print(concept_of_interest, 'has these object occurences in images', concept_detected_objects)
+
+        co_occurrence_matrix, object_names = create_co_occurrence_matrix(concept_detected_objects)
+        create_heatmap(concept_of_interest, co_occurrence_matrix, object_names)
+
+    print('starting heatmaps for concept', concept_of_interest, 'for the dataset', ACs_list_name)
+    set_occurrence_heatmaps(ACs_list_name, concept_of_interest)
+    return
+
+    print('starting heatmaps for concept', concept_of_interest, 'for the dataset', ACs_list_name)
+    set_occurrence_heatmaps(ACs_list_name, concept_of_interest)
+    return
+
+def new_co_occurence_heatmaps(ACs_list_name, concept_of_interest, consider_person):
+    def create_co_occurrence_matrix(concept_detected_objects, consider_person):
+        # Flatten the list of lists to get all detected object names
+        all_object_names = [obj_name for sublist in concept_detected_objects for obj_name in sublist]
+
+        # If consider_person is False, remove 'person' from the object names
+        if not consider_person:
+            all_object_names = [obj_name for obj_name in all_object_names if obj_name != 'person']
+
+        # Extract unique object names from the flattened list and sort alphabetically
+        object_names = sorted(list(set(all_object_names)))
+        print('object names is a list ', object_names)
+
+        # Initialize an empty co-occurrence matrix
+        num_objects = len(object_names)
+        co_occurrence_matrix = np.zeros((num_objects, num_objects), dtype=int)
+        print('initial cooccr matrix', co_occurrence_matrix)
+
+        # Create a dictionary to map object names to matrix indices
+        object_to_index = {obj_name: index for index, obj_name in enumerate(object_names)}
+
+        # Populate the co-occurrence matrix based on the flattened list
+        for detected_objects in concept_detected_objects:
+            if not consider_person:
+                detected_objects = [obj_name for obj_name in detected_objects if obj_name != 'person']
+            for obj_name in detected_objects:
+                for other_obj_name in detected_objects:
+                    if obj_name != other_obj_name:
+                        # Increase the count for co-occurrence of obj_name and other_obj_name
+                        i, j = object_to_index[obj_name], object_to_index[other_obj_name]
+                        co_occurrence_matrix[i, j] += 1
+
+        print('updated cooccur matrix', co_occurrence_matrix)
+        return co_occurrence_matrix, object_names
+
+    def create_heatmap(concept_name, co_occurrence_matrix, object_names):
+        # Create a heatmap using seaborn
+        plt.figure(figsize=(12, 10))
+        sns.heatmap(co_occurrence_matrix, annot=False, fmt='d', cmap="YlGnBu", xticklabels=object_names,
+                    yticklabels=object_names, cbar=True, cbar_kws={"label": "Co-occurrence count"})
+        plt.title(f"Co-occurrence Heatmap for Concept: {concept_name}")
+        plt.xlabel("Detected Objects")
+        plt.ylabel("Detected Objects")
+        plt.show()
+
+    def set_occurrence_heatmaps(ACs_list_name, concept_of_interest, consider_person):
+        concept_detected_objects = []
+        concept_images, merged_ARTstract = load_inputs(ACs_list_name)
+        for img_id, image_info in merged_ARTstract.items():
+            concept_name = None
+            detected_objects = None
+
+            # Find the concept_name and detected_objects dynamically
+            for key, value in image_info['evoked_clusters'].items():
+                if value.get('cluster_name') == concept_of_interest:
+                    concept_name = value['cluster_name']
+                    detected_objects_list = image_info['od'].get("ARTstract_od_2023_06_28", {}).get("detected_objects",
+                                                                                                    [])
+                    detected_objects = [detected_object["detected_object"] for detected_object in detected_objects_list]
+
+            if concept_name and detected_objects:
+                concept_detected_objects.append(detected_objects)
+
+        co_occurrence_matrix, object_names = create_co_occurrence_matrix(concept_detected_objects, consider_person)
+        create_heatmap(concept_of_interest, co_occurrence_matrix, object_names)
+
+    print('starting heatmaps for concept', concept_of_interest, 'for the dataset', ACs_list_name)
+    set_occurrence_heatmaps(ACs_list_name, concept_of_interest, consider_person)
 
 # Execution examples
 dataset_colors = ['#00BFFF', '#FF6F61', '#9370DB', '#2E8B57']
-concept_colors = ['#1f77b4', '#ff7f0e', '#2ca02c', '#d62728', '#9467bd', '#8c564b', '#e377c2']
+concept_colors = ['#1f77b4', '#ff7f0e', '#2ca02c', '#d62728', '#9467bd', 's#8c564b', '#e377c2']
 ACs_list_names = ["Balanced_ARTstract_ACs_lists"]
 # ACs_list_names = ["ARTstract_ACs_lists", "Balanced_ARTstract_ACs_lists"]
 
@@ -592,7 +809,13 @@ ACs_list_names = ["Balanced_ARTstract_ACs_lists"]
 # stats_evocation_strengths(dataset_colors, concept_colors, ACs_list_names)
 # stats_num_detected_objects(dataset_colors, concept_colors, ACs_list_names)
 # stats_detected_objects(dataset_colors, concept_colors, ACs_list_names)
-stats_detected_objects(ACs_list_names)
+# stats_detected_objects(ACs_list_names)
+#concepts_of_interest = ['safety']
+concepts_of_interest = ['comfort', 'danger', 'death', 'fitness', 'freedom', 'power', 'safety']
+for concept_of_interest in concepts_of_interest:
+    new_co_occurence_heatmaps("Balanced_ARTstract_ACs_lists", concept_of_interest, consider_person=False)
+
+
 
 
 
