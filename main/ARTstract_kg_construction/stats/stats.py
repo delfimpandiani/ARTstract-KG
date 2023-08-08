@@ -1,6 +1,6 @@
 import json
 import matplotlib
-# matplotlib.use('Agg')
+matplotlib.use('Agg')
 import numpy as np
 import matplotlib.pyplot as plt
 import itertools
@@ -34,14 +34,13 @@ def load_inputs(ACs_list_name):
         merged_ARTstract = json.load(file)
         return concept_images, merged_ARTstract
 
-## Concept evocation frequencies
-def stats_concept_frequencies(dataset_colors, concept_colors, ACs_list_name):
-
+## Abstract Concept Evocation frequencies
+def stats_concept_frequencies(ACs_list_names, dataset_colors, concept_colors):
     def concept_frequency_in_source_datasets(ACs_list_name):
-        concept_images, merged_ARTstract = load_inputs()
+        concept_images, merged_ARTstract = load_inputs(ACs_list_name)
         # Information on the source dataset for each image
         source_datasets = {}
-        for image_id, image_info in merged_ARTstract.items(ACs_list_name):
+        for image_id, image_info in merged_ARTstract.items():
             if "source_dataset" in image_info:
                 source_datasets[image_id] = image_info["source_dataset"]
 
@@ -63,7 +62,8 @@ def stats_concept_frequencies(dataset_colors, concept_colors, ACs_list_name):
 
         return concept_frequency
 
-    def plot_concept_frequencies(concept_frequencies, save_filename, dataset_colors=None, concept_colors=None):
+    def plot_concept_frequencies(ACs_list_name, dataset_colors, concept_colors):
+        concept_frequencies = concept_frequency_in_source_datasets(ACs_list_name)
         # Extract the concepts and source datasets
         concepts = list(concept_frequencies.keys())
         source_datasets = set(dataset for frequencies in concept_frequencies.values() for dataset in frequencies.keys())
@@ -96,24 +96,20 @@ def stats_concept_frequencies(dataset_colors, concept_colors, ACs_list_name):
         ax.set_xticklabels(concepts)
         ax.legend()
 
+        save_filename = f'output_imgs/evocation_data/concept_frequencies/concept_frequencies_{ACs_list_name}.png'
         # Show the plot
         plt.tight_layout()
         plt.show()
         # Save the plot as an image
         plt.savefig(save_filename)
-
-        # Show the plot (optional, you can comment this line out if you don't want to display the plot in the PyCharm's plot viewer)
         plt.show()
 
-    # Get concept frequencies data (format: {concept: {source_dataset: frequency}})
     for ACs_list_name in ACs_list_names:
-        concept_frequencies = concept_frequency_in_source_datasets(ACs_list_name)
-        # Create data visualizations
-        plot_concept_frequencies(concept_frequencies, f'output_imgs/concept_frequencies_{ACs_list_name}.png', dataset_colors=dataset_colors, concept_colors=concept_colors)
+        plot_concept_frequencies(ACs_list_name, dataset_colors, concept_colors)
     return
 
-## Evocation strength
-def stats_evocation_strengths(dataset_colors, concept_colors, AC_list_names):
+## Abstract Concept Evocation strengths
+def stats_evocation_strengths(ACs_list_names, dataset_colors, concept_colors, plot_type):
     def get_evocation_strength_by_image(ACs_list_name):
         concept_images, merged_ARTstract = load_inputs(ACs_list_name)
         evocation_strength_by_concept = {concept: [] for concept in concept_images}
@@ -129,7 +125,8 @@ def stats_evocation_strengths(dataset_colors, concept_colors, AC_list_names):
 
         return evocation_strength_by_concept
 
-    def calculate_average_evocation_strength_by_concept(evocation_strength_by_concept):
+    def calculate_average_evocation_strength_by_concept(ACs_list_name):
+        evocation_strength_by_concept = get_evocation_strength_by_image(ACs_list_name)
         average_strength_by_concept = {}
         for concept, strengths in evocation_strength_by_concept.items():
             if len(strengths) > 0:
@@ -138,8 +135,9 @@ def stats_evocation_strengths(dataset_colors, concept_colors, AC_list_names):
 
         return average_strength_by_concept
 
-    def plot_evocation_strengths(evocation_strength_by_concept, save_filename, dataset_colors=None,
+    def plot_evocation_strengths(ACs_list_name, dataset_colors=None,
                                  concept_colors=None, plot_type="plot"):
+        evocation_strength_by_concept = get_evocation_strength_by_image(ACs_list_name)
         # Extract the concepts and average evocation strengths
         concepts = list(evocation_strength_by_concept.keys())
         average_strengths = [sum(strengths) / len(strengths) if len(strengths) > 0 else 0.0 for strengths in
@@ -181,24 +179,19 @@ def stats_evocation_strengths(dataset_colors, concept_colors, AC_list_names):
         plt.tight_layout()
         plt.show()
 
+        save_filename = f'output_imgs/evocation_data/evocation_strength/{plot_type}_evocation_strengths_{ACs_list_name}.png'
         # Save the plot as an image
         plt.savefig(save_filename)
-
-        # Show the plot (optional, you can comment this line out if you don't want to display the plot in the PyCharm's plot viewer)
         plt.show()
 
         return
 
     for ACs_list_name in ACs_list_names:
-        evocation_strength_by_concept = get_evocation_strength_by_image(ACs_list_name)
-        average_strength_by_concept = calculate_average_evocation_strength_by_concept(evocation_strength_by_concept)
-        plot_type = "plot"
-        plot_evocation_strengths(evocation_strength_by_concept, f'output_imgs/{plot_type}_evocation_strengths_{ACs_list_name}.png', dataset_colors=dataset_colors, concept_colors=concept_colors, plot_type=plot_type)
-
-        print(average_strength_by_concept)
+        plot_evocation_strengths(ACs_list_name, dataset_colors=dataset_colors, concept_colors=concept_colors, plot_type=plot_type)
+    return
 
 ## Object detection
-def stats_num_detected_objects(dataset_colors, concept_colors, AC_list_names):
+def stats_num_detected_objects(ACs_list_names, dataset_colors, concept_colors, plot_type):
     def get_detected_objects_by_image(ACs_list_name):
         concept_images, merged_ARTstract = load_inputs(ACs_list_name)
         detected_objects_by_concept = {concept: [] for concept in concept_images}
@@ -218,7 +211,9 @@ def stats_num_detected_objects(dataset_colors, concept_colors, AC_list_names):
         print(detected_objects_by_concept)
         return num_detected_objects_by_concept, detected_objects_by_concept
 
-    def calculate_average_num_detected_objects_by_concept(num_detected_objects_by_concept):
+    def calculate_average_num_detected_objects_by_concept(ACs_list_name):
+        num_detected_objects_by_concept, detected_objects_by_concept = get_detected_objects_by_image(ACs_list_name)
+        print(num_detected_objects_by_concept)
         average_num_detected_objects_by_concept = {}
         for concept, num_detected_objects in num_detected_objects_by_concept.items():
             if len(num_detected_objects) > 0:
@@ -227,12 +222,11 @@ def stats_num_detected_objects(dataset_colors, concept_colors, AC_list_names):
 
         return average_num_detected_objects_by_concept
 
-    def plot_avg_num_detected_objects(num_detected_objects_by_concept, save_filename, dataset_colors=None,
-                                 concept_colors=None, plot_type="plot"):
-        # Extract the concepts and average evocation strengths
+    def plot_avg_num_detected_objects(ACs_list_name, dataset_colors, concept_colors, plot_type):
+        num_detected_objects_by_concept, detected_objects_by_concept = get_detected_objects_by_image(ACs_list_name)
         concepts = list(num_detected_objects_by_concept.keys())
         average_num_detected_objects = [sum(num_detected_objects) / len(num_detected_objects) if len(num_detected_objects) > 0 else 0.0 for num_detected_objects in
-                             num_detected_objects_by_concept.values()]
+                              num_detected_objects_by_concept.values()]
 
         # Sort the concepts alphabetically
         sorted_indices = np.argsort(concepts)
@@ -252,7 +246,6 @@ def stats_num_detected_objects(dataset_colors, concept_colors, AC_list_names):
             # Plot the average evocation strengths using a line plot
             ax.plot(x_coordinates, average_num_detected_objects_sorted, marker='o', color='b')
 
-
         elif plot_type == "bar":
             # Create a bar chart with each concept having its corresponding color
             ax.bar(x_coordinates, average_num_detected_objects_sorted, color=concept_colors_ordered)
@@ -263,34 +256,25 @@ def stats_num_detected_objects(dataset_colors, concept_colors, AC_list_names):
         ax.set_title('Average Number of Detected Objects by Concept')
         ax.set_xticks(x_coordinates)
         ax.set_xticklabels(concepts, rotation=45, ha='right')
-
         ax.set_ylim(1, 5)
-
+        save_filename = f'output_imgs/perceptual_data/detected_objects/{plot_type}_num_detected_objects_{ACs_list_name}.png'
         # Show the plot
         plt.tight_layout()
         plt.show()
-
         # Save the plot as an image
         plt.savefig(save_filename)
-
-        # Show the plot (optional, you can comment this line out if you don't want to display the plot in the PyCharm's plot viewer)
         plt.show()
-
         return
 
     for ACs_list_name in ACs_list_names:
-        num_detected_objects_by_concept, detected_objects_by_concept = get_detected_objects_by_image(ACs_list_name)
-        average_num_detected_objects_by_concept = calculate_average_num_detected_objects_by_concept(num_detected_objects_by_concept)
-        plot_type = "plot"
-        plot_avg_num_detected_objects(num_detected_objects_by_concept, f'output_imgs/{plot_type}_num_detected_objects_{ACs_list_name}.png', dataset_colors=dataset_colors, concept_colors=concept_colors, plot_type=plot_type)
-
-        print(average_num_detected_objects_by_concept)
+        plot_avg_num_detected_objects(ACs_list_name, dataset_colors, concept_colors, plot_type)
+        return
 
 def stats_detected_objects(ACs_list_names):
     def get_detected_objects_by_concept(ACs_list_name):
         concept_images, merged_ARTstract = load_inputs(ACs_list_name)
-        for concept, list in concept_images.items():
-            print(concept, "has these many images ", len(list))
+        # for concept, list in concept_images.items():
+            # print(concept, "has these many images ", len(list))
         detected_objects_by_concept = {concept: [] for concept in concept_images}
         for concept, images in concept_images.items():
             for img in images:
@@ -349,10 +333,8 @@ def stats_detected_objects(ACs_list_names):
         plt.show()
 
         # Save the plot as an image
-        save_filename = f"output_imgs/top_30_{ACs_list_name}.jpg"
+        save_filename = f"output_imgs/perceptual_data/detected_objects/top_30_{ACs_list_name}.jpg"
         plt.savefig(save_filename)
-
-        # Show the plot (optional, you can comment this line out if you don't want to display the plot in the PyCharm's plot viewer)
         plt.show()
 
     def find_common_objects(ACs_list_name):
@@ -440,9 +422,9 @@ def stats_detected_objects(ACs_list_names):
                     unique_top_10_objects.append(obj)
 
             relevant_objects_by_concept[concept] = unique_top_10_objects
-        print(relevant_objects_by_concept)
-        for concept, od_set in relevant_objects_by_concept.items():
-            print(concept, "has relevant concepts: ", od_set)
+        # print(relevant_objects_by_concept)
+        # for concept, od_set in relevant_objects_by_concept.items():
+        #     print(concept, "has relevant concepts: ", od_set)
         return relevant_objects_by_concept
 
     def find_top_objects(ACs_list_name, num_top_objects=15):
@@ -465,8 +447,8 @@ def stats_detected_objects(ACs_list_names):
             # Extract the objects from the sorted list
             ordered_objects = [obj for obj, score in sorted_objects]
             ordered_lists_by_concept[concept] = ordered_objects
-        for concept, od_set in ordered_lists_by_concept.items():
-            print(concept, "has top concepts: ", od_set)
+        # for concept, od_set in ordered_lists_by_concept.items():
+        #     print(concept, "has top concepts: ", od_set)
         return top_objects_by_concept
 
     def find_top_relevant_objects(ACs_list_name, k=15):
@@ -496,9 +478,9 @@ def stats_detected_objects(ACs_list_names):
             # Take only the top k relevant concepts
             top_relevant_objects_by_concept[concept] = [obj for obj, _ in sorted_objects[:k]]
             # Print the top relevant concepts
-        for concept, concepts in top_relevant_objects_by_concept.items():
-            print(concept, "has top relevant concepts:", concepts)
-        print(top_relevant_objects_by_concept)
+        # for concept, concepts in top_relevant_objects_by_concept.items():
+        #     print(concept, "has top relevant concepts:", concepts)
+        # print(top_relevant_objects_by_concept)
         return top_relevant_objects_by_concept
 
     def find_top_relevant_objects_by_concept_w_freqs(ACs_list_name):
@@ -517,8 +499,8 @@ def stats_detected_objects(ACs_list_names):
             top_relevant_objects_by_concept_w_freqs[concept] = objects_with_freqs
 
         # Print the top relevant concepts and their frequencies
-        for concept, concepts in top_relevant_objects_by_concept_w_freqs.items():
-            print(concept, "has top relevant concepts and frequencies:", concepts)
+        # for concept, concepts in top_relevant_objects_by_concept_w_freqs.items():
+        #     print(concept, "has top relevant concepts and frequencies:", concepts)
 
         return top_relevant_objects_by_concept_w_freqs
 
@@ -591,7 +573,7 @@ def stats_detected_objects(ACs_list_names):
 
             plt.show()
             # Save the plot as an image
-            save_filename = f"{concept}_{ACs_list_name}_object_wordcloud.jpg"
+            save_filename = f"output_imgs/perceptual_data/detected_objects/wordclouds/{concept}_{ACs_list_name}_object_wordcloud.jpg"
             plt.savefig(save_filename)
             plt.show()
 
@@ -599,16 +581,16 @@ def stats_detected_objects(ACs_list_names):
 
     for ACs_list_name in ACs_list_names:
         ## EXECUTION
-        get_detected_objects_by_concept(ACs_list_name)
+        # get_detected_objects_by_concept(ACs_list_name)
         # calculate_object_frequencies(ACs_list_name)
-        # plot_object_frequencies(ACs_list_name)
+        plot_object_frequencies(ACs_list_name)
         # find_common_objects(ACs_list_name)
         # find_unique_objects(ACs_list_name)
         # find_relevant_objects(ACs_list_name)
         # find_top_objects(ACs_list_name)
         # find_top_relevant_objects(ACs_list_name)
         # find_top_relevant_objects_by_concept_w_freqs(ACs_list_name)
-        # create_concepts_wordclouds(ACs_list_name)
+        create_concepts_wordclouds(ACs_list_name)
     return
 
 def object_co_occurence_heatmaps(ACs_list_names, consider_person):
@@ -646,14 +628,18 @@ def object_co_occurence_heatmaps(ACs_list_names, consider_person):
         print('updated cooccur matrix', co_occurrence_matrix)
         return co_occurrence_matrix, object_names
 
-    def create_heatmap(concept_name, co_occurrence_matrix, object_names):
+    def create_heatmap(concept_of_interest, co_occurrence_matrix, object_names):
         # Create a heatmap using seaborn
         plt.figure(figsize=(12, 10))
         sns.heatmap(co_occurrence_matrix, annot=False, fmt='d', cmap="YlGnBu", xticklabels=object_names,
                     yticklabels=object_names, cbar=True, cbar_kws={"label": "Co-occurrence count"})
-        plt.title(f"Co-occurrence Heatmap for Concept: {concept_name}")
+        plt.title(f"Co-occurrence Heatmap for Concept: {concept_of_interest}")
         plt.xlabel("Detected Objects")
         plt.ylabel("Detected Objects")
+        plt.show()
+        # Save the plot as an image
+        save_filename = f"output_imgs/perceptual_data/detected_objects/co_occurrence_heatmaps/{concept_of_interest}_{ACs_list_name}_object_cooccurr_heatmap.jpg"
+        plt.savefig(save_filename)
         plt.show()
 
     def set_occurrence_heatmaps(ACs_list_name, concept_of_interest, consider_person):
@@ -677,11 +663,9 @@ def object_co_occurence_heatmaps(ACs_list_names, consider_person):
         co_occurrence_matrix, object_names = create_co_occurrence_matrix(concept_detected_objects, consider_person)
         create_heatmap(concept_of_interest, co_occurrence_matrix, object_names)
 
-    # concepts_of_interest = ['safety']
     concepts_of_interest = ['comfort', 'danger', 'death', 'fitness', 'freedom', 'power', 'safety']
     for concept_of_interest in concepts_of_interest:
         for ACs_list_name in ACs_list_names:
-            print('starting heatmaps for concept', concept_of_interest, 'for the dataset', ACs_list_name)
             set_occurrence_heatmaps(ACs_list_name, concept_of_interest, consider_person)
     return
 
@@ -689,8 +673,8 @@ def object_co_occurence_heatmaps(ACs_list_names, consider_person):
 def stats_image_captions(ACs_list_names):
     def get_image_captions_by_concept(ACs_list_name):
         concept_images, merged_ARTstract = load_inputs(ACs_list_name)
-        for concept, list in concept_images.items():
-            print(concept, "has these many images ", len(list))
+        # for concept, list in concept_images.items():
+        #     print(concept, "has these many images ", len(list))
         image_captions_by_concept = {concept: [] for concept in concept_images}
         for concept, images in concept_images.items():
             for img in images:
@@ -740,7 +724,7 @@ def stats_image_captions(ACs_list_names):
             word_frequencies = Counter(lemmatized_words)
             word_frequencies_by_concept[concept] = word_frequencies
 
-        print(word_frequencies_by_concept)
+        # print(word_frequencies_by_concept)
         return word_frequencies_by_concept
     def plot_caption_words_frequencies(ACs_list_name):
         word_frequencies_by_concept = calculate_caption_words_frequencies(ACs_list_name)
@@ -773,7 +757,7 @@ def stats_image_captions(ACs_list_names):
         plt.show()
 
         # Save the plot as an image
-        save_filename = f"output_imgs/top_caption_words_{ACs_list_name}.jpg"
+        save_filename = f"output_imgs/perceptual_data/image_captions/top_30_caption_words_{ACs_list_name}.jpg"
         plt.savefig(save_filename)
 
         plt.show()
@@ -876,7 +860,7 @@ def stats_image_captions(ACs_list_names):
             sorted_words = sorted(words_percentages.items(), key=lambda x: x[1], reverse=True)
             top_words = dict(sorted_words[:k])
             top_caption_words_by_concept[concept] = top_words
-        print("Top words by concept: ", top_caption_words_by_concept)
+        # print("Top words by concept: ", top_caption_words_by_concept)
         ordered_lists_by_concept = {}
         for concept, word_scores in top_caption_words_by_concept.items():
             # Sort objects based on their scores in descending order
@@ -884,8 +868,8 @@ def stats_image_captions(ACs_list_names):
             # Extract the objects from the sorted list
             ordered_words = [obj for obj, score in sorted_words]
             ordered_lists_by_concept[concept] = ordered_words
-        for concept, word_set in ordered_lists_by_concept.items():
-            print(concept, "has top concepts: ", word_set)
+        # for concept, word_set in ordered_lists_by_concept.items():
+        #     print(concept, "has top concepts: ", word_set)
         return top_caption_words_by_concept
     def find_top_relevant_caption_words_by_concept(ACs_list_name, k=15):
         top_caption_words_by_concept = find_top_caption_words_by_concept(ACs_list_name)
@@ -913,8 +897,8 @@ def stats_image_captions(ACs_list_names):
             # Take only the top k relevant concepts
             top_relevant_caption_words_by_concept[concept] = [obj for obj, _ in sorted_words[:k]]
             # Print the top relevant concepts
-        for concept, concepts in top_relevant_caption_words_by_concept.items():
-            print(concept, "has top relevant concepts:", concepts)
+        # for concept, concepts in top_relevant_caption_words_by_concept.items():
+        #     print(concept, "has top relevant concepts:", concepts)
         print(top_relevant_caption_words_by_concept)
         return top_relevant_caption_words_by_concept
     def find_top_relevant_objects_by_concept_w_freqs(ACs_list_name):
@@ -934,8 +918,8 @@ def stats_image_captions(ACs_list_names):
             top_relevant_caption_words_by_concept_w_freqs[concept] = words_with_freqs
 
         # Print the top relevant concepts and their frequencies
-        for concept, words in top_relevant_caption_words_by_concept_w_freqs.items():
-            print(concept, "has top relevant caption words and frequencies:", words)
+        # for concept, words in top_relevant_caption_words_by_concept_w_freqs.items():
+        #     print(concept, "has top relevant caption words and frequencies:", words)
 
         return top_relevant_caption_words_by_concept_w_freqs
     def create_caption_words_wordclouds(ACs_list_name):
@@ -1006,7 +990,7 @@ def stats_image_captions(ACs_list_names):
 
             plt.show()
             # Save the plot as an image
-            save_filename = f"caption_words_{concept}_{ACs_list_name}_wordcloud.jpg"
+            save_filename = f"output_imgs/perceptual_data/image_captions/wordclouds/caption_words_{concept}_{ACs_list_name}_wordcloud.jpg"
             plt.savefig(save_filename)
             plt.show()
 
@@ -1017,7 +1001,7 @@ def stats_image_captions(ACs_list_names):
         # get_image_captions_by_concept(ACs_list_name)
         # get_captions_text_by_concept(ACs_list_name)
         # calculate_caption_words_frequencies(ACs_list_name)
-        # plot_caption_words_frequencies(ACs_list_name)
+        plot_caption_words_frequencies(ACs_list_name)
         # find_common_words(ACs_list_name)
         # find_unique_caption_words(ACs_list_name)
         # find_relevant_caption_words_by_concept(ACs_list_name)
@@ -1027,52 +1011,9 @@ def stats_image_captions(ACs_list_names):
         create_caption_words_wordclouds(ACs_list_name)
     return
 
-def caption_words_co_occurence_heatmaps(ACs_list_names, consider_person):
-    def create_co_occurrence_matrix(concept_caption_words, consider_person):
-        # Flatten the list of lists to get all detected object names
-        all_lemmatized_words = [lemmatized_word for sublist in concept_caption_words for lemmatized_word in sublist]
+def caption_words_co_occurences(ACs_list_names, consider_painting):
 
-        # If consider_person is False, remove 'person' from the object names
-        if not consider_person:
-            all_lemmatized_words = [lemmatized_word for lemmatized_word in all_lemmatized_words if lemmatized_word != 'person']
-
-        # Extract unique object names from the flattened list and sort alphabetically
-        lemmatized_words = sorted(list(set(all_lemmatized_words)))
-        print('lemmatized words is a list with length ', len(lemmatized_words))
-
-        # Initialize an empty co-occurrence matrix
-        num_lemmatized_words = len(lemmatized_words)
-        co_occurrence_matrix = np.zeros((num_lemmatized_words, num_lemmatized_words), dtype=int)
-        print('initial matrix', co_occurrence_matrix)
-
-        # Create a dictionary to map object names to matrix indices
-        word_to_index = {word: index for index, word in enumerate(lemmatized_words)}
-
-        # Populate the co-occurrence matrix based on the flattened list
-        for img_caption_words in concept_caption_words:
-            if not consider_person:
-                img_caption_words = [word for word in img_caption_words if word != 'person']
-            for word in img_caption_words:
-                for other_word in img_caption_words:
-                    if word != other_word:
-                        # Increase the count for co-occurrence of word and other_word
-                        i, j = word_to_index[word], word_to_index[other_word]
-                        co_occurrence_matrix[i, j] += 1
-
-        print('updated cooccur matrix', co_occurrence_matrix)
-        return co_occurrence_matrix, lemmatized_words
-
-    def create_heatmap(concept_name, co_occurrence_matrix, lemmatized_words):
-        # Create a heatmap using seaborn
-        plt.figure(figsize=(12, 10))
-        sns.heatmap(co_occurrence_matrix, annot=False, fmt='d', cmap="YlGnBu", xticklabels=lemmatized_words,
-                    yticklabels=lemmatized_words, cbar=True, cbar_kws={"label": "Co-occurrence count"})
-        plt.title(f"Co-occurrence Heatmap for Concept: {concept_name}")
-        plt.xlabel("Detected Objects")
-        plt.ylabel("Detected Objects")
-        plt.show()
-
-    def set_occurrence_heatmaps(ACs_list_name, concept_of_interest, consider_person):
+    def get_concept_caption_words(ACs_list_name, concept_of_interest, consider_painting):
         concept_caption_words = []
         concept_images, merged_ARTstract = load_inputs(ACs_list_name)
         # Get the set of English stopwords from NLTK
@@ -1100,41 +1041,510 @@ def caption_words_co_occurence_heatmaps(ACs_list_names, consider_person):
             if concept_name and lemmatized_words:
                 concept_caption_words.append(lemmatized_words)
 
-        co_occurrence_matrix, lemmatized_words = create_co_occurrence_matrix(concept_caption_words, consider_person)
-        create_heatmap(concept_of_interest, co_occurrence_matrix, lemmatized_words)
+        # Flatten the list of lists to get all detected object names
+        all_lemmatized_words = [lemmatized_word for sublist in concept_caption_words for lemmatized_word in sublist]
+
+        # If consider_person is False, remove 'person' from the object names
+        if not consider_painting:
+            all_lemmatized_words = [lemmatized_word for lemmatized_word in all_lemmatized_words if
+                                    lemmatized_word != 'painting']
+
+        # Calculate word frequencies using Counter to get the top 60 lemmatized words
+        word_frequencies = Counter(all_lemmatized_words)
+        top_lemmatized_words = [word for word, _ in word_frequencies.most_common(60)]
+
+        # Extract unique object names from the top 60 lemmatized words and sort alphabetically
+        lemmatized_words = sorted(list(set(top_lemmatized_words)))
+        # print('lemmatized words is a list with length', len(lemmatized_words))
+
+        return concept_caption_words, lemmatized_words
+
+    def create_co_occurrence_matrix(ACs_list_name, concept_of_interest, consider_painting):
+        concept_caption_words, lemmatized_words = get_concept_caption_words(ACs_list_name, concept_of_interest, consider_painting)
+
+        # Initialize an empty co-occurrence matrix
+        num_lemmatized_words = len(lemmatized_words)
+        co_occurrence_matrix = np.zeros((num_lemmatized_words, num_lemmatized_words), dtype=int)
+        # Create a dictionary to map object names to matrix indices
+        word_to_index = {word: index for index, word in enumerate(lemmatized_words)}
+
+        # Populate the co-occurrence matrix based on the flattened list
+        for img_caption_words in concept_caption_words:
+            if not consider_painting:
+                img_caption_words = [word for word in img_caption_words if word != 'painting']
+            for word in img_caption_words:
+                for other_word in img_caption_words:
+                    if word != other_word:
+                        # Check if the words exist in the word_to_index dictionary
+                        if word in word_to_index and other_word in word_to_index:
+                            # Increase the count for co-occurrence of word and other_word
+                            i, j = word_to_index[word], word_to_index[other_word]
+                            co_occurrence_matrix[i, j] += 1
+        return co_occurrence_matrix, lemmatized_words
+
+    def create_co_occurrence_heatmap(ACs_list_name, concept_of_interest, consider_painting):
+        co_occurrence_matrix, lemmatized_words = create_co_occurrence_matrix(ACs_list_name, concept_of_interest, consider_painting)
+        # Create a heatmap using seaborn
+        plt.figure(figsize=(12, 10))
+        sns.heatmap(co_occurrence_matrix, annot=False, fmt='d', cmap="YlGnBu", xticklabels=lemmatized_words,
+                    yticklabels=lemmatized_words, cbar=True, cbar_kws={"label": "Co-occurrence count"})
+        plt.title(f"Co-occurrence Heatmap for Concept: {concept_of_interest} in {ACs_list_name}")
+        plt.xlabel("Caption Word")
+        plt.ylabel("Caption Word")
+        plt.show()
+        plt.show()
+        # Save the plot as an image
+        save_filename = f"output_imgs/perceptual_data/image_captions/co_occurrence_heatmaps/{concept_of_interest}_{ACs_list_name}_caption_cooccurr_heatmap.jpg"
+        plt.savefig(save_filename)
+        plt.show()
+        return
+
+    def get_top_co_occurrences(ACs_list_name, concept_of_interest, consider_painting, top_n=60):
+        concept_caption_words, lemmatized_words = get_concept_caption_words(ACs_list_name, concept_of_interest, consider_painting)
+        # Create a dictionary to map object names to matrix indices
+        word_to_index = {word: index for index, word in enumerate(lemmatized_words)}
+
+        # Calculate the co-occurrence counts for each word pair
+        co_occurrence_counts = {}
+        for img_caption_words in concept_caption_words:
+            if not consider_painting:
+                img_caption_words = [word for word in img_caption_words if word != 'painting']
+            for word in img_caption_words:
+                for other_word in img_caption_words:
+                    if word != other_word:
+                        # Check if the words exist in the word_to_index dictionary
+                        if word in word_to_index and other_word in word_to_index:
+                            i, j = word_to_index[word], word_to_index[other_word]
+                            word_pair = tuple(sorted([word, other_word]))
+                            co_occurrence_counts[word_pair] = co_occurrence_counts.get(word_pair, 0) + 1
+
+        # Sort the co-occurrence counts by the counts in descending order
+        sorted_co_occurrences = sorted(co_occurrence_counts.items(), key=lambda x: x[1], reverse=True)
+        top_sorted_co_occurrences = sorted_co_occurrences[:top_n]
+        # print(f"Top {top_n} caption words co-occurrences for concept {concept_of_interest}:")
+        # for (word1, word2), count in top_sorted_co_occurrences:
+        #     print(f"{word1} - {word2}: {count}")
+        # Return the top n co-occurrences
+        return top_sorted_co_occurrences
+
+    def get_relevant_cooccurrences(ACs_list_name, concepts_of_interest, consider_painting, top_n=60):
+        top_co_occurrences_by_concept = {}
+        for concept_of_interest in concepts_of_interest:
+            top_co_occurrences = get_top_co_occurrences(ACs_list_name, concept_of_interest, consider_painting, top_n=60)
+            top_co_occurrences_by_concept[concept_of_interest] = top_co_occurrences
+
+        co_occurrence_relevance_by_concept = {}
+        seen_co_occurrences = set()
+
+        for concept_of_interest, top_co_occurrences in top_co_occurrences_by_concept.items():
+            relevant_co_occurrences = []
+            for (word1, word2), count in top_co_occurrences:
+                co_occurrence_pair = (word1, word2)
+                reverse_co_occurrence_pair = (word2, word1)
+
+                if co_occurrence_pair not in seen_co_occurrences and reverse_co_occurrence_pair not in seen_co_occurrences:
+                    relevant_co_occurrences.append(co_occurrence_pair)
+                    seen_co_occurrences.add(co_occurrence_pair)
+
+            co_occurrence_relevance_by_concept[concept_of_interest] = relevant_co_occurrences
+
+        def print_relevant_cooccurrences(co_occurrence_relevance_by_concept):
+            for concept_of_interest, relevant_co_occurrences in co_occurrence_relevance_by_concept.items():
+                print(f"Concept: {concept_of_interest}")
+                for word1, word2 in relevant_co_occurrences:
+                    print(f"   - {word1}, {word2}")
+                print()  # Empty line for separating concepts
+
+
+        # Assuming you have already calculated and stored the co_occurrence_relevance_by_concept
+        print_relevant_cooccurrences(co_occurrence_relevance_by_concept)
+        return co_occurrence_relevance_by_concept
+
+    def create_caption_cooccurrence_wordclouds(ACs_list_name, concepts_of_interest, consider_painting, top_n=60):
+        co_occurrence_relevance_by_concept = get_relevant_cooccurrences(ACs_list_name, concepts_of_interest, consider_painting, top_n=60)
+        for concept_of_interest, relevant_co_occurrences in co_occurrence_relevance_by_concept.items():
+            words = [f"{word1}, {word2}" for word1, word2 in relevant_co_occurrences]
+            wordcloud = WordCloud(width=800, height=400, background_color='white').generate(' '.join(words))
+
+            plt.figure(figsize=(10, 5))
+            plt.imshow(wordcloud, interpolation='bilinear')
+            plt.axis('off')
+            plt.title(f'Relevant Co-occurrence Pairs for Concept: {concept_of_interest}')
+            plt.show()
+            plt.show()
+            # Save the plot as an image
+            save_filename = f"output_imgs/perceptual_data/image_captions/wordclouds/{concept_of_interest}_{ACs_list_name}_caption_cooccurr_wordcloud.jpg"
+            plt.savefig(save_filename)
+            plt.show()
 
     # concepts_of_interest = ['safety']
     concepts_of_interest = ['comfort', 'danger', 'death', 'fitness', 'freedom', 'power', 'safety']
-    for concept_of_interest in concepts_of_interest:
-        for ACs_list_name in ACs_list_names:
-            print('starting heatmaps for concept', concept_of_interest, 'for the dataset', ACs_list_name)
-            set_occurrence_heatmaps(ACs_list_name, concept_of_interest, consider_person)
+    for ACs_list_name in ACs_list_names:
+        # get_relevant_cooccurrences(ACs_list_name, concepts_of_interest, consider_painting, top_n=30)
+        create_caption_cooccurrence_wordclouds(ACs_list_name, concepts_of_interest, consider_painting, top_n=60)
+        for concept_of_interest in concepts_of_interest:
+           create_co_occurrence_heatmap(ACs_list_name, concept_of_interest, consider_painting)
+    return
+
+## Top colors
+def stats_top_colors(ACs_list_names):
+    def get_top_colors_by_concept(ACs_list_name):
+        concept_images, merged_ARTstract = load_inputs(ACs_list_name)
+        # for concept, list in concept_images.items():
+            # print(concept, "has these many images ", len(list))
+        top_colors_by_concept = {concept: [] for concept in concept_images}
+        for concept, images in concept_images.items():
+            for img in images:
+                for image_id, image_info in merged_ARTstract.items():
+                    if img == image_id:
+                        top_colors_list = merged_ARTstract[img].get("color", {}).get("ARTstract_color_2023_06_26", [])
+                        top_color_webcolor = [color_object["webcolor_name"] for color_object in
+                                            top_colors_list]
+                        top_colors_by_concept[concept].extend(top_color_webcolor)
+        return top_colors_by_concept
+
+    def calculate_colors_frequencies(ACs_list_name):
+        top_colors_by_concept = get_top_colors_by_concept(ACs_list_name)
+        color_frequencies_by_concept = {}
+        all_detected_colors = []
+
+        for concept, top_colors in top_colors_by_concept.items():
+            color_frequencies = Counter(top_colors)
+            color_frequencies_by_concept[concept] = color_frequencies
+            all_detected_colors.extend(top_colors)
+
+        all_color_frequencies = Counter(all_detected_colors)
+        return color_frequencies_by_concept, all_color_frequencies
+
+    def plot_colors_frequencies(ACs_list_name):
+        color_frequencies_by_concept, all_color_frequencies = calculate_colors_frequencies(ACs_list_name)
+        num_concepts = len(color_frequencies_by_concept)
+        fig, axs = plt.subplots(num_concepts + 1, 1, figsize=(12, 5 * (num_concepts + 1)), sharex=True)
+
+        # Calculate top 30 colors across all concepts, excluding the top colors with "gray" in it
+        all_color_frequencies = {}
+        for concept, color_frequencies in color_frequencies_by_concept.items():
+            for color, freq in color_frequencies.items():
+                if "gray" not in color:
+                    all_color_frequencies[color] = all_color_frequencies.get(color, 0) + freq
+
+        sorted_all_frequencies = sorted(all_color_frequencies.items(), key=lambda x: x[1], reverse=True)
+        top_all_colors, top_all_frequencies = zip(*sorted_all_frequencies[:30])
+
+        # Plot top 30 objects across all concepts, excluding the top colors with "gray" in it
+        axs[0].bar(top_all_colors, top_all_frequencies)
+        axs[0].set_title("Top 30 Colors Across All Concepts (excluding 'gray's)")
+        axs[0].tick_params(axis='x', rotation=45, labelsize=8)
+
+        for i, (concept, color_frequencies) in enumerate(color_frequencies_by_concept.items(), start=1):
+            # Filter out colors containing "gray" in their names
+            filtered_color_frequencies = {color: freq for color, freq in color_frequencies.items() if
+                                          "gray" not in color.lower()}
+
+            sorted_frequencies = sorted(filtered_color_frequencies.items(), key=lambda x: x[1], reverse=True)
+            colors, frequencies = zip(
+                *sorted_frequencies[:30])  # Taking top 30 objects, excluding the first color "gre"
+
+            axs[i].bar(colors, frequencies)
+            axs[i].set_title(f"Top Colors for Concept '{concept}'")
+            axs[i].tick_params(axis='x', rotation=45, labelsize=8)
+
+        plt.tight_layout()
+        plt.show()
+
+        # Save the plot as an image
+        save_filename = f"output_imgs/perceptual_data/color/top_30_{ACs_list_name}.jpg"
+        plt.savefig(save_filename)
+        plt.show()
+
+    def find_common_colors(ACs_list_name):
+        color_frequencies_by_concept, all_color_frequencies = calculate_colors_frequencies(ACs_list_name)
+        # Calculate overall frequency of each object across all concepts
+        all_color_frequencies = {}
+        for color_frequencies in color_frequencies_by_concept.values():
+            for color, freq in color_frequencies.items():
+                all_color_frequencies[color] = all_color_frequencies.get(color, 0) + freq
+
+        # Sort objects based on their overall frequency in descending order
+        sorted_overall_frequencies = sorted(all_color_frequencies.items(), key=lambda x: x[1], reverse=True)
+        ordered_colors = [color for color, freq in sorted_overall_frequencies]
+
+        # Get the set of common objects that are present in every concept
+        common_colors = set.intersection(
+            *[set(frequencies.keys()) for frequencies in color_frequencies_by_concept.values()])
+
+        # Return the ordered set of common objects
+        ordered_common_colors = [color for color in ordered_colors if color in common_colors]
+        # common_objects = find_common_objects(object_frequencies_by_concept)
+        print("for all concepts, the most common colors are (from most common to least: ", common_colors)
+        return ordered_common_colors
+
+    def find_unique_colors(ACs_list_name):
+        color_frequencies_by_concept, all_color_frequencies = calculate_colors_frequencies(ACs_list_name)
+
+        unique_colors_by_concept = {concept: set(frequencies.keys()) for concept, frequencies in
+                                     color_frequencies_by_concept.items()}
+        for concept, frequencies in color_frequencies_by_concept.items():
+            for other_concept, other_frequencies in color_frequencies_by_concept.items():
+                if concept != other_concept:
+                    unique_colors_by_concept[concept] -= set(other_frequencies.keys())
+
+        for concept, color_set in unique_colors_by_concept.items():
+            if len(color_set) == 0:
+                print(concept, "does not have any unique colors")
+            else:
+                print(concept, "is the only one with top colors: ", color_set)
+
+        return unique_colors_by_concept
+
+    def find_relevant_colors(ACs_list_name):
+        color_frequencies_by_concept, all_color_frequencies = calculate_colors_frequencies(ACs_list_name)
+
+        # Calculate overall frequency of each object across all concepts
+        all_color_frequencies = Counter()
+        for color_frequencies in color_frequencies_by_concept.values():
+            all_color_frequencies.update(color_frequencies)
+
+        relevant_colors_by_concept = {}
+
+        for concept, color_frequencies in color_frequencies_by_concept.items():
+            # Calculate relative frequency (TF) for each object within the concept
+            relative_frequencies = {
+                color: freq / all_color_frequencies[color]
+                for color, freq in color_frequencies.items()
+            }
+
+            # Calculate inverse concept frequency (IDF) for each object
+            num_concepts = len(color_frequencies_by_concept)
+            inverse_concept_frequency = {color: num_concepts / sum(
+                1 for concept_freqs in color_frequencies_by_concept.values() if color in concept_freqs)
+                                         for color in color_frequencies}
+
+            # Calculate relevance score for each object in the concept (TF * IDF)
+            relevance_scores = {color: round(relative_frequencies[color] * inverse_concept_frequency[color], 3)
+                                for color in color_frequencies}
+
+            # Sort objects based on their relevance scores in descending order
+            sorted_relevance_scores = sorted(relevance_scores.items(), key=lambda x: x[1], reverse=True)
+
+            # Keep only the objects unique to the current concept's top 10 objects
+            top_15_colors = [color for color, score in sorted_relevance_scores[:15]]
+
+            # Check if each object appears in only the current concept's top 10 list
+            unique_top_15_colors = []
+            for color in top_15_colors:
+                unique_to_current_concept = True
+                for other_concept, other_top_15 in relevant_colors_by_concept.items():
+                    if other_concept != concept and color in other_top_15:
+                        unique_to_current_concept = False
+                        break
+                if unique_to_current_concept:
+                    unique_top_15_colors.append(color)
+
+            relevant_colors_by_concept[concept] = unique_top_15_colors
+        # print(relevant_colors_by_concept)
+        # for concept, color_set in relevant_colors_by_concept.items():
+        #    print(concept, "has relevant top colors: ", color_set)
+        return relevant_colors_by_concept
+
+    def find_top_colors(ACs_list_name, num_top_objects=15):
+        color_frequencies_by_concept, all_color_frequencies = calculate_colors_frequencies(ACs_list_name)
+
+        top_colors_by_concept = {}
+        for concept, frequencies in color_frequencies_by_concept.items():
+            total_detected_colors = sum(frequencies.values())
+            colors_percentages = {
+                color: (count / total_detected_colors) * 100 for color, count in frequencies.items()
+            }
+            sorted_colors = sorted(colors_percentages.items(), key=lambda x: x[1], reverse=True)
+            top_colors = dict(sorted_colors[:num_top_objects])
+            top_colors_by_concept[concept] = top_colors
+        print("Top colors by concept: ", top_colors_by_concept)
+        ordered_lists_by_concept = {}
+        for concept, color_scores in top_colors_by_concept.items():
+            # Sort objects based on their scores in descending order
+            sorted_colors = sorted(color_scores.items(), key=lambda x: x[1], reverse=True)
+            # Extract the objects from the sorted list
+            ordered_colors = [color for color, score in sorted_colors]
+            ordered_lists_by_concept[concept] = ordered_colors
+        # for concept, od_set in ordered_lists_by_concept.items():
+        #     print(concept, "has top concepts: ", od_set)
+        return top_colors_by_concept
+
+    def find_top_relevant_colors(ACs_list_name, k=15):
+        top_colors_by_concept = find_top_colors(ACs_list_name)
+        relevant_colors_by_concept = find_relevant_colors(ACs_list_name)
+
+        top_relevant_colors_by_concept = {}
+
+        for concept, top_colors in top_colors_by_concept.items():
+            # Get the relevant concepts for the current concept
+            relevant_colors = relevant_colors_by_concept.get(concept, [])
+            # Calculate the relevance scores for the relevant concepts
+            relevance_scores = {color: 1 for color in relevant_colors}
+            # Convert top_concepts dictionary to a list of tuples (object, score)
+            top_colors_list = list(top_colors.items())
+            # Sort the top_concepts_list based on scores in descending order
+            top_colors_list.sort(key=lambda x: x[1], reverse=True)
+            # Extract the objects from the sorted list
+            top_colors_sorted = [color for color, _ in top_colors_list]
+            # Ensure all objects in top_concepts_sorted have scores in relevance_scores dictionary
+            relevance_scores.update({color: 0 for color in top_colors_sorted if color not in relevance_scores})
+            # Calculate the Jaccard similarity between the top concepts and relevant concepts
+            jaccard_scores = {color: len(set([color]).intersection(set(top_colors_sorted))) / len(
+                set([color]).union(set(top_colors_sorted))) for color in relevant_colors}
+            # Sort objects based on Jaccard similarity scores in descending order
+            sorted_colors = sorted(jaccard_scores.items(), key=lambda x: x[1], reverse=True)
+            # Take only the top k relevant concepts
+            top_relevant_colors_by_concept[concept] = [obj for obj, _ in sorted_colors[:k]]
+            # Print the top relevant concepts
+        # for concept, concepts in top_relevant_objects_by_concept.items():
+        #     print(concept, "has top relevant concepts:", concepts)
+        # print(top_relevant_objects_by_concept)
+        return top_relevant_colors_by_concept
+
+    def find_top_relevant_colors_by_concept_w_freqs(ACs_list_name):
+        top_relevant_colors_by_concept = find_top_relevant_colors(ACs_list_name)
+        color_frequencies_by_concept, all_color_frequencies = calculate_colors_frequencies(ACs_list_name)
+        top_relevant_colors_by_concept_w_freqs = {}
+
+        for concept, top_relevant_colors in top_relevant_colors_by_concept.items():
+            # Get the color frequencies for the current concept
+            color_frequencies = color_frequencies_by_concept.get(concept, {})
+
+            # Fetch frequencies for top relevant objects and create a dictionary {object: frequency}
+            colors_with_freqs = {color: color_frequencies.get(color, 0) for color in top_relevant_colors}
+
+            # Store the dictionary {object: frequency} for the current concept
+            top_relevant_colors_by_concept_w_freqs[concept] = colors_with_freqs
+
+        # Print the top relevant concepts and their frequencies
+        # for concept, colors in top_relevant_colors_by_concept_w_freqs.items():
+        #     print(concept, "has top relevant colors and frequencies:", colors)
+
+        return top_relevant_colors_by_concept_w_freqs
+
+    def create_colors_wordclouds(ACs_list_name):
+        top_colors_by_concept = find_top_colors(ACs_list_name)
+        top_relevant_colors_by_concept_w_freqs = find_top_relevant_colors_by_concept_w_freqs(ACs_list_name)
+        class GroupedColorFunc(object):
+            def __init__(self, color_to_words, default_color):
+                self.color_func_to_words = [
+                    (get_single_color_func(color), set(words))
+                    for (color, words) in color_to_words.items()]
+
+                self.default_color_func = get_single_color_func(default_color)
+
+            def get_color_func(self, word):
+                """Returns a single_color_func associated with the word"""
+                try:
+                    color_func = next(
+                        color_func for (color_func, words) in self.color_func_to_words
+                        if word in words)
+                except StopIteration:
+                    color_func = self.default_color_func
+
+                return color_func
+
+            def __call__(self, word, **kwargs):
+                return self.get_color_func(word)(word, **kwargs)
+
+        font_color = '#0074D9'  # Use any shade of blue you prefer
+        helvetica_font = 'Helvetica.ttf'  # Replace with the path to your Helvetica font file
+
+        # Remove "person" from top_objects_by_concept and top_relevant_objects_by_concept
+        #for top_colors in top_colors_by_concept.values():
+            #top_colors.pop('person', None)
+
+        #for top_relevant_colors in top_relevant_colors_by_concept_w_freqs.values():
+        #    if 'person' in top_relevant_colors:
+        #        top_relevant_colors.remove('person')
+
+        # Generate word clouds for each concept
+        for concept, top_colors in top_colors_by_concept.items():
+            # Create word cloud objects
+            wc_top_colors = WordCloud(
+                collocations=False,
+                background_color='white',
+                font_path=helvetica_font,  # Set the font to Helvetica
+                color_func=lambda *args, **kwargs: font_color  # Set all words to blue color
+            ).generate_from_frequencies(top_colors)
+
+            # Get the top relevant objects for the current concept
+            top_relevant_colors = top_relevant_colors_by_concept_w_freqs.get(concept, {})
+            wc_top_relevant_colors = WordCloud(
+                collocations=False,
+                background_color='white',
+                font_path=helvetica_font,  # Set the font to Helvetica
+                color_func=lambda *args, **kwargs: font_color  # Set all words to blue color
+            ).generate_from_frequencies(top_relevant_colors)
+
+            # Plot the word clouds side by side
+            fig, axes = plt.subplots(1, 2, figsize=(12, 6))
+
+            axes[0].imshow(wc_top_colors, interpolation="bilinear")
+            axes[0].axis("off")
+            axes[0].set_title(f"Top Colors for Concept: {concept}")
+
+            axes[1].imshow(wc_top_relevant_colors, interpolation="bilinear")
+            axes[1].axis("off")
+            axes[1].set_title(f"Top Relevant Colors for Concept: {concept}")
+
+            plt.show()
+            # Save the plot as an image
+            save_filename = f"output_imgs/perceptual_data/color/wordclouds/{concept}_{ACs_list_name}_color_wordcloud.jpg"
+            plt.savefig(save_filename)
+            plt.show()
+
+        return
+
+    for ACs_list_name in ACs_list_names:
+        ## EXECUTION
+        # get_top_colors_by_concept(ACs_list_name)
+        # calculate_colors_frequencies(ACs_list_name)
+        # plot_colors_frequencies(ACs_list_name)
+        # find_common_colors(ACs_list_name)
+        # find_unique_colors(ACs_list_name)
+        # find_relevant_colors(ACs_list_name)
+        # find_top_colors(ACs_list_name)
+        find_top_relevant_colors(ACs_list_name)
+        # find_top_relevant_colors_by_concept_w_freqs(ACs_list_name)
+        create_colors_wordclouds(ACs_list_name)
     return
 
 
+
+
+
+
+
+
 # Execution input examples
+# ACs_list_names = ["Balanced_ARTstract_ACs_lists"]
+ACs_list_names = ["ARTstract_ACs_lists", "Balanced_ARTstract_ACs_lists"]
 dataset_colors = ['#00BFFF', '#FF6F61', '#9370DB', '#2E8B57']
-concept_colors = ['#1f77b4', '#ff7f0e', '#2ca02c', '#d62728', '#9467bd', 's#8c564b', '#e377c2']
-ACs_list_names = ["Balanced_ARTstract_ACs_lists"]
-# ACs_list_names = ["ARTstract_ACs_lists", "Balanced_ARTstract_ACs_lists"]
+concept_colors = ['#1f77b4', '#ff7f0e', '#2ca02c', '#d62728', '#9467bd', '#8c564b', '#e377c2']
+plot_type = "bar"
 
 
-
-## Call the functions
+## EXECUTION
 
 ### Concept frequencies over different source datasets
-# stats_concept_frequencies(dataset_colors, concept_colors, ACs_list_names)
+# stats_concept_frequencies(ACs_list_names, dataset_colors, concept_colors)
 
 ### Evocation strengths
-# stats_evocation_strengths(dataset_colors, concept_colors, ACs_list_names)
+# stats_evocation_strengths(ACs_list_names, dataset_colors, concept_colors, plot_type)
 
 ### Detected objects
-# stats_num_detected_objects(dataset_colors, concept_colors, ACs_list_names)
+# stats_num_detected_objects(ACs_list_names, dataset_colors, concept_colors, plot_type)
 # stats_detected_objects(ACs_list_names)
 # object_co_occurence_heatmaps(ACs_list_names, consider_person=False)
 
 ### Image captions
 # stats_image_captions(ACs_list_names)
-caption_words_co_occurence_heatmaps(ACs_list_names, consider_person=True)
+# caption_words_co_occurences(ACs_list_names, consider_painting=False)
 
+
+### Top colors
+stats_top_colors(ACs_list_names)
 
