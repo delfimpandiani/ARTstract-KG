@@ -1,31 +1,29 @@
 import json
-import matplotlib
-matplotlib.use('Agg')
-import numpy as np
-import matplotlib.pyplot as plt
-import itertools
-from collections import Counter
-import networkx as nx
-plt.interactive(False)
-from wordcloud import WordCloud, get_single_color_func
-import matplotlib.pyplot as plt
-import networkx as nx
-import itertools
-import matplotlib.pyplot as plt
-import numpy as np
-import seaborn as sns
-import pandas as pd
-import matplotlib.pyplot as plt
-import seaborn as sns
-from collections import Counter
 import nltk
-from nltk.corpus import stopwords
-from nltk.stem import PorterStemmer
-from nltk.stem import WordNetLemmatizer
+import itertools
+import matplotlib
+import matplotlib.pyplot as plt
+import networkx as nx
+import numpy as np
+import pandas as pd
+import seaborn as sns
+import webcolors
+import wordcloud
 
+from collections import Counter
+from matplotlib.collections import PatchCollection
+from matplotlib.patches import Rectangle
+from nltk.corpus import stopwords
+from nltk.stem import PorterStemmer, WordNetLemmatizer
+from nltk.tokenize import word_tokenize
+from wordcloud import WordCloud, get_single_color_func
+
+matplotlib.use('Agg')
+plt.interactive(False)
 nltk.download('stopwords')
 nltk.download('punkt')
 nltk.download('wordnet')
+
 
 def load_inputs(ACs_list_name):
     with open(f"../input/{ACs_list_name}.json", "r") as file:
@@ -1187,7 +1185,7 @@ def caption_words_co_occurences(ACs_list_names, consider_painting):
     return
 
 ## Top colors
-def stats_top_colors(ACs_list_names):
+def stats_top_colors(ACs_list_names, filter_grays_out):
     def get_top_colors_by_concept(ACs_list_name):
         concept_images, merged_ARTstract = load_inputs(ACs_list_name)
         # for concept, list in concept_images.items():
@@ -1256,6 +1254,89 @@ def stats_top_colors(ACs_list_names):
         save_filename = f"output_imgs/perceptual_data/color/top_30_{ACs_list_name}.jpg"
         plt.savefig(save_filename)
         plt.show()
+
+    def palette_colors_frequencies_with_palettes(ACs_list_name, filter_grays_out):
+        color_frequencies_by_concept, all_color_frequencies = calculate_colors_frequencies(ACs_list_name)
+        # Sort the concepts alphabetically
+        sorted_concepts = sorted(color_frequencies_by_concept.keys())
+        num_concepts = len(sorted_concepts)
+        fig, axs = plt.subplots(num_concepts + 1, 1, figsize=(12, 5 * (num_concepts + 1)), sharex=True)
+
+        # Calculate top 30 colors across all concepts, excluding the top colors with "gray" in it
+        all_color_frequencies = {}
+        for concept, color_frequencies in color_frequencies_by_concept.items():
+            for color, freq in color_frequencies.items():
+                if filter_grays_out == True:
+                    if "gray" not in color:
+                        all_color_frequencies[color] = all_color_frequencies.get(color, 0) + freq
+                else:
+                    all_color_frequencies[color] = all_color_frequencies.get(color, 0) + freq
+        sorted_all_frequencies = sorted(all_color_frequencies.items(), key=lambda x: x[1], reverse=True)
+        top_all_colors, top_all_frequencies = zip(*sorted_all_frequencies[:30])
+
+        # Convert color names to RGB values using webcolors
+        top_all_colors_rgb = [webcolors.name_to_rgb(color) for color in top_all_colors]
+
+        # Convert color names to RGB values using webcolors and normalize them
+        top_all_colors_rgb_normalized = [tuple(value / 255.0 for value in color_rgb) for color_rgb in
+                                         top_all_colors_rgb]
+
+        # Create color patches for top colors with sizes based on frequencies
+        color_patches = [
+            Rectangle((0, 0), freq / max(top_all_frequencies), 1, fc=color_rgb)
+            for color_rgb, freq in zip(top_all_colors_rgb_normalized, top_all_frequencies)
+        ]
+        axs[0].add_collection(PatchCollection(color_patches, match_original=True))
+        if filter_grays_out == True:
+            axs[0].set_title("Top 30 Colors Across All Concepts (excluding 'gray's)")
+        else:
+            axs[0].set_title("Top 30 Colors Across All Concepts")
+        axs[0].set_xlim(0, 1)  # Set x-axis limit for the palette width
+
+        for i, concept in enumerate(sorted_concepts, start=1):
+            color_frequencies = color_frequencies_by_concept[concept]
+            # Filter out colors containing "gray" in their names
+            if filter_grays_out == True:
+                filtered_color_frequencies = {color: freq for color, freq in color_frequencies.items() if
+                                              "gray" not in color.lower()}
+            else:
+                filtered_color_frequencies = {color: freq for color, freq in color_frequencies.items()}
+
+            sorted_frequencies = sorted(filtered_color_frequencies.items(), key=lambda x: x[1], reverse=True)
+            colors, frequencies = zip(
+                *sorted_frequencies[:30])  # Taking top 30 objects, excluding the first color "gre"
+
+            # Convert color names to RGB values using webcolors
+            colors_rgb = [webcolors.name_to_rgb(color) for color in colors]
+
+            # Convert color names to RGB values using webcolors and normalize them
+            colors_rgb_normalized = [tuple(value / 255.0 for value in color_rgb) for color_rgb in colors_rgb]
+
+            # Create color patches for top colors with sizes based on frequencies
+            color_patches = [
+                plt.Rectangle((0, 0), freq / max(frequencies), 1, fc=color_rgb)
+                for color_rgb, freq in zip(colors_rgb_normalized, frequencies)
+            ]
+            axs[i].add_collection(PatchCollection(color_patches, match_original=True))
+            axs[i].set_title(f"Top Colors for Concept '{concept}'")
+
+            if filter_grays_out == True:
+                axs[i].set_title(f"Top Colors for Concept '{concept} (excluding 'gray's)")
+            else:
+                axs[i].set_title(f"Top Colors for Concept '{concept}'")
+            axs[i].set_xlim(0, 1)  # Set x-axis limit for the palette width
+
+        plt.tight_layout()
+        plt.show()
+
+        # Save the plot as an image
+        if filter_grays_out == True:
+            save_filename = f"output_imgs/perceptual_data/color/palette/filtered_grays_top_30_{ACs_list_name}.jpg"
+        else:
+            save_filename = f"output_imgs/perceptual_data/color/palette/top_30_{ACs_list_name}.jpg"
+        plt.savefig(save_filename)
+        plt.show()
+        return
 
     def find_common_colors(ACs_list_name):
         color_frequencies_by_concept, all_color_frequencies = calculate_colors_frequencies(ACs_list_name)
@@ -1452,14 +1533,6 @@ def stats_top_colors(ACs_list_names):
         font_color = '#0074D9'  # Use any shade of blue you prefer
         helvetica_font = 'Helvetica.ttf'  # Replace with the path to your Helvetica font file
 
-        # Remove "person" from top_objects_by_concept and top_relevant_objects_by_concept
-        #for top_colors in top_colors_by_concept.values():
-            #top_colors.pop('person', None)
-
-        #for top_relevant_colors in top_relevant_colors_by_concept_w_freqs.values():
-        #    if 'person' in top_relevant_colors:
-        #        top_relevant_colors.remove('person')
-
         # Generate word clouds for each concept
         for concept, top_colors in top_colors_by_concept.items():
             # Create word cloud objects
@@ -1498,30 +1571,302 @@ def stats_top_colors(ACs_list_names):
 
         return
 
+    def create_colors_palettes(ACs_list_name):
+        top_colors_by_concept = find_top_colors(ACs_list_name)
+        top_relevant_colors_by_concept_w_freqs = find_top_relevant_colors_by_concept_w_freqs(ACs_list_name)
+        font_color = '#0074D9'  # Use any shade of blue you prefer
+        helvetica_font = 'Helvetica.ttf'  # Replace with the path to your Helvetica font file
+
+        # Generate color palettes for each concept
+        for concept, top_colors in top_colors_by_concept.items():
+            # Convert color names to RGB values using webcolors and normalize them
+            top_colors_rgb_normalized = [tuple(value / 255.0 for value in webcolors.name_to_rgb(color)) for color in
+                                         top_colors]
+            sorted_color_patches = [
+                (color_rgb, freq)
+                for color_rgb, freq in zip(top_colors_rgb_normalized, top_colors.values())
+            ]
+            sorted_color_patches.sort(key=lambda x: x[1], reverse=True)
+
+            # Plot the color palettes
+            fig, axs = plt.subplots(1, 2, figsize=(12, 6))
+
+            x_position = 0
+            for color_rgb, freq in sorted_color_patches:
+                rect = plt.Rectangle((x_position, 0), freq, 1, fc=color_rgb)
+                axs[0].add_patch(rect)
+                x_position += freq
+
+            axs[0].axis("off")
+            axs[0].set_xlim(0, x_position)  # Set x-axis limit for the palette width
+            axs[0].set_title(f"Top Colors for Concept: {concept}")
+
+            # Get the top relevant colors for the current concept
+            top_relevant_colors = top_relevant_colors_by_concept_w_freqs.get(concept, {})
+            top_relevant_colors_rgb_normalized = [tuple(value / 255.0 for value in webcolors.name_to_rgb(color)) for
+                                                  color in top_relevant_colors]
+            sorted_relevant_color_patches = [
+                (color_rgb, freq)
+                for color_rgb, freq in zip(top_relevant_colors_rgb_normalized, top_relevant_colors.values())
+            ]
+            sorted_relevant_color_patches.sort(key=lambda x: x[1], reverse=True)
+
+            x_position = 0
+            for color_rgb, freq in sorted_relevant_color_patches:
+                rect = plt.Rectangle((x_position, 0), freq, 1, fc=color_rgb)
+                axs[1].add_patch(rect)
+                x_position += freq
+
+            axs[1].axis("off")
+            axs[1].set_xlim(0, x_position)  # Set x-axis limit for the palette width
+            axs[1].set_title(f"Top Relevant Colors for Concept: {concept}")
+
+            plt.show()
+
+            # Save the plot as an image
+            save_filename = f"output_imgs/perceptual_data/color/palette/{concept}_{ACs_list_name}_color_palette.jpg"
+            plt.savefig(save_filename)
+            plt.show()
+
+        return
+
     for ACs_list_name in ACs_list_names:
         ## EXECUTION
         # get_top_colors_by_concept(ACs_list_name)
         # calculate_colors_frequencies(ACs_list_name)
         # plot_colors_frequencies(ACs_list_name)
+        # palette_colors_frequencies_with_palettes(ACs_list_name,  filter_grays_out)
         # find_common_colors(ACs_list_name)
         # find_unique_colors(ACs_list_name)
         # find_relevant_colors(ACs_list_name)
         # find_top_colors(ACs_list_name)
-        find_top_relevant_colors(ACs_list_name)
+        # find_top_relevant_colors(ACs_list_name)
         # find_top_relevant_colors_by_concept_w_freqs(ACs_list_name)
-        create_colors_wordclouds(ACs_list_name)
+        # create_colors_wordclouds(ACs_list_name)
+        create_colors_palettes(ACs_list_name)
+    return
+
+def colors_co_occurrences(ACs_list_names, filter_grays_out):
+    def create_co_occurrence_matrix(concept_top_colors, filter_grays_out):
+        # Flatten the list of color lists to get all color names
+        all_colors = [color_name for color_list in concept_top_colors for color_name in color_list]
+        color_names = sorted(list(set(all_colors)))
+
+        # Initialize an empty co-occurrence matrix
+        num_colors = len(color_names)
+        co_occurrence_matrix = np.zeros((num_colors, num_colors), dtype=int)
+
+        # Create a dictionary to map color names to matrix indices
+        color_to_index = {color_name: index for index, color_name in enumerate(color_names)}
+
+        # Populate the co-occurrence matrix based on the top color lists
+        for top_colors in concept_top_colors:
+            for color_name in top_colors:
+                for other_color_name in top_colors:
+                    if color_name != other_color_name:
+                        # Increase the count for co-occurrence of color_name and other_color_name
+                        i, j = color_to_index[color_name], color_to_index[other_color_name]
+                        co_occurrence_matrix[i, j] += 1
+
+        return co_occurrence_matrix, color_names
+    def create_heatmap(concept_of_interest, co_occurrence_matrix, color_names):
+        # Create a heatmap using seaborn
+        plt.figure(figsize=(12, 10))
+        sns.heatmap(co_occurrence_matrix, annot=False, fmt='d', cmap="YlGnBu", xticklabels=color_names,
+                    yticklabels=color_names, cbar=True, cbar_kws={"label": "Co-occurrence count"})
+        plt.title(f"Co-occurrence Heatmap for Concept: {concept_of_interest}")
+        plt.xlabel("Colors")
+        plt.ylabel("Colors")
+        plt.show()
+        # Save the plot as an image
+        save_filename = f"output_imgs/perceptual_data/color/co_occurrence_heatmaps/{concept_of_interest}_{ACs_list_name}_color_cooccurr_heatmap.jpg"
+        plt.savefig(save_filename)
+        plt.show()
+
+    def get_occurrence_pairs(co_occurrence_matrix, color_names, concept_of_interest, filter_grays):
+        if filter_grays:
+            # Exclude colors containing "gray" in their names
+            filtered_indices = [i for i, name in enumerate(color_names) if "gray" not in name.lower()]
+            co_occurrence_matrix = co_occurrence_matrix[filtered_indices][:, filtered_indices]
+            color_names = [color_names[i] for i in filtered_indices]
+
+        # Get the top 15 co-occurrences
+        top_indices = np.unravel_index(np.argsort(co_occurrence_matrix.ravel())[-15:], co_occurrence_matrix.shape)
+        top_color_pairs = [(color_names[i], color_names[j]) for i, j in zip(*top_indices)]
+
+        # Create the heatmap visualization
+        fig, axs = plt.subplots(len(top_color_pairs), 2, figsize=(6, 2 * len(top_color_pairs)))
+        fig.suptitle(f'Co-occurrences for Concept: {concept_of_interest}', fontsize=16)
+
+        for idx, (color1, color2) in enumerate(top_color_pairs):
+            ax = axs[idx, 0]
+            ax.set_xticks([])
+            ax.set_yticks([])
+            ax.set_title(color1)
+            ax.add_patch(plt.Rectangle((0, 0), 1, 1, color=color1))
+
+            ax = axs[idx, 1]
+            ax.set_xticks([])
+            ax.set_yticks([])
+            ax.set_title(color2)
+            ax.add_patch(plt.Rectangle((0, 0), 1, 1, color=color2))
+
+        plt.tight_layout(rect=[0, 0.03, 1, 0.95])
+
+        # Save the plot as an image
+        save_filename = f"output_imgs/perceptual_data/color/co_occurrence_pairs/{concept_of_interest}_{ACs_list_name}_color_cooccurr_heatmap.jpg"
+        plt.savefig(save_filename)
+        plt.show()
+    def set_occurrence_heatmaps(ACs_list_name, concept_of_interest, filter_grays_out):
+        concept_detected_colors = []
+        concept_images, merged_ARTstract = load_inputs(ACs_list_name)
+        for img_id, image_info in merged_ARTstract.items():
+            concept_name = None
+            detected_colors = None
+
+            # Find the concept_name and detected_objects dynamically
+            for key, value in image_info['evoked_clusters'].items():
+                if value.get('cluster_name') == concept_of_interest:
+                    concept_name = value['cluster_name']
+                    detected_colors_list = image_info['color'].get("ARTstract_color_2023_06_26", [])
+                    detected_colors = [color_object["webcolor_name"] for color_object in
+                                            detected_colors_list]
+            if concept_name and detected_colors:
+                concept_detected_colors.append(detected_colors)
+
+        co_occurrence_matrix, color_names = create_co_occurrence_matrix(concept_detected_colors, filter_grays_out)
+        get_occurrence_pairs(co_occurrence_matrix, color_names, concept_of_interest, filter_grays=True)
+        create_heatmap(concept_of_interest, co_occurrence_matrix, color_names)
+
+    concepts_of_interest = ['comfort', 'danger', 'death', 'fitness', 'freedom', 'power', 'safety']
+    for concept_of_interest in concepts_of_interest:
+        for ACs_list_name in ACs_list_names:
+            set_occurrence_heatmaps(ACs_list_name, concept_of_interest, filter_grays_out)
+    return
+
+## Emotions
+
+def stats_emotions(ACs_list_names):
+    def get_emotions_by_concept(ACs_list_name):
+        concept_images, merged_ARTstract = load_inputs(ACs_list_name)
+        emotions_by_concept = {concept: [] for concept in concept_images}
+        emotions_by_concept_w_strengths = {concept: [] for concept in concept_images}
+
+        for concept, images in concept_images.items():
+            for img in images:
+                for image_id, image_info in merged_ARTstract.items():
+                    if img == image_id:
+                        emotion_object = merged_ARTstract[img].get("em", {}).get("ARTstract_em_2023_06_26", {})
+                        emotion = emotion_object['emotion']
+                        em_strength = emotion_object['annotation_strength']
+                        emotions_by_concept[concept].append(emotion)
+                        emotions_by_concept_w_strengths[concept].append((emotion, em_strength))
+        return emotions_by_concept, emotions_by_concept_w_strengths
+
+    def calculate_emotion_frequencies(ACs_list_name):
+        emotions_by_concept, emotions_by_concept_w_strengths = get_emotions_by_concept(ACs_list_name)
+        emotion_frequencies_by_concept = {}
+
+        for concept, emotions_list in emotions_by_concept.items():
+            emotion_frequencies = Counter(emotions_list)
+            emotion_frequencies_by_concept[concept] = emotion_frequencies
+
+        return emotion_frequencies_by_concept
+
+    def plot_emotion_frequencies(ACs_list_name):
+        emotion_frequencies_by_concept = calculate_emotion_frequencies(ACs_list_name)
+        num_concepts = len(emotion_frequencies_by_concept)
+        emotions = ["amusement", "awe", "anger", "contentment", "fear", "excitement", "sadness", "disgust",
+                    "something else"]
+        fig, axs = plt.subplots(num_concepts + 1, 1, figsize=(12, 5 * (num_concepts + 1)), sharex=True)
+
+        # Calculate the total number of images for each concept
+        total_images_by_concept = {concept: sum(emotion_frequencies.values()) for concept, emotion_frequencies in
+                                   emotion_frequencies_by_concept.items()}
+
+        # Calculate the overall emotion frequencies across all concepts
+        all_emotion_frequencies = Counter()
+        for emotion_frequencies in emotion_frequencies_by_concept.values():
+            all_emotion_frequencies.update(emotion_frequencies)
+
+        # Calculate the percentage of images with each emotion
+        for emotion in emotions:
+            all_emotion_frequencies[emotion] /= sum(total_images_by_concept.values())
+
+        # Sort emotions based on their overall frequency in descending order
+        sorted_all_emotion_frequencies = sorted(all_emotion_frequencies.items(), key=lambda x: x[1], reverse=True)
+        ordered_emotions = [emotion for emotion, freq in sorted_all_emotion_frequencies]
+
+        max_y_value = 0.75  # Set the maximum y-axis value to 0.75 (75%)
+
+        # Plot the total emotion frequencies subplot
+        frequencies_total = [all_emotion_frequencies.get(emotion, 0) for emotion in ordered_emotions]
+        axs[0].bar(ordered_emotions, frequencies_total)
+        axs[0].set_title("Overall Emotion Frequencies")
+        axs[0].set_ylabel("Percentage of Images")
+        axs[0].tick_params(axis='x', rotation=45, labelsize=8)
+        axs[0].set_ylim(0, max_y_value)  # Set consistent y-axis limits
+
+        # Plot the emotion frequencies for each concept subplot
+        sorted_concepts = sorted(emotion_frequencies_by_concept.keys())  # Sort concepts alphabetically
+        for i, concept in enumerate(sorted_concepts, start=1):
+            emotion_frequencies = emotion_frequencies_by_concept[concept]
+            frequencies = [emotion_frequencies.get(emotion, 0) / total_images_by_concept[concept] for emotion in
+                           ordered_emotions]
+            axs[i].bar(ordered_emotions, frequencies)
+            axs[i].set_title(f"Emotion Frequencies for Concept '{concept}'")
+            axs[i].set_ylabel("Percentage of Images")
+            axs[i].tick_params(axis='x', rotation=45, labelsize=8)
+            axs[i].set_ylim(0, max_y_value)  # Set consistent y-axis limits
+
+        plt.tight_layout()
+        plt.show()
+
+        # Save the plot as an image
+        save_filename = f"output_imgs/perceptual_data/emotion/emotion_frequencies_{ACs_list_name}.jpg"
+        plt.savefig(save_filename)
+        plt.show()
+
+    def create_emotion_wordclouds(ACs_list_name):
+        emotions_by_concept, emotions_by_concept_w_strengths = get_emotions_by_concept(ACs_list_name)
+        font_color = '#0074D9'  # Use any shade of blue you prefer
+        helvetica_font = 'Helvetica.ttf'  # Replace with the path to your Helvetica font file
+
+        for concept, emotions_list in emotions_by_concept.items():
+            emotions_text = " ".join([emotion for emotion in emotions_list if emotion is not None])
+
+            wc_emotions = WordCloud(
+                collocations=False,
+                background_color='white',
+                font_path=helvetica_font,
+                color_func=lambda *args, **kwargs: font_color
+            ).generate(emotions_text)
+
+            plt.imshow(wc_emotions, interpolation="bilinear")
+            plt.axis("off")
+            plt.title(f"Emotion Word Cloud for Concept: {concept}")
+            plt.show()
+
+            # Save the word cloud as an image
+            save_filename = f"output_imgs/perceptual_data/emotion/wordclouds/emotion_wordcloud_{concept}_{ACs_list_name}.jpg"
+            wc_emotions.to_file(save_filename)
+
+    # List of concepts of interest
+    concepts_of_interest = ['comfort', 'danger', 'death', 'fitness', 'freedom', 'power', 'safety']
+
+# something else
+
+    for ACs_list_name in ACs_list_names:
+        # get_emotions_by_concept(ACs_list_name)
+        plot_emotion_frequencies(ACs_list_name)
+        # create_emotion_wordclouds(ACs_list_name)
+
     return
 
 
-
-
-
-
-
-
 # Execution input examples
-# ACs_list_names = ["Balanced_ARTstract_ACs_lists"]
-ACs_list_names = ["ARTstract_ACs_lists", "Balanced_ARTstract_ACs_lists"]
+# ACs_list_names = ["ARTstract_ACs_lists", "Balanced_ARTstract_ACs_lists"]
+ACs_list_names = ["Balanced_ARTstract_ACs_lists"]
 dataset_colors = ['#00BFFF', '#FF6F61', '#9370DB', '#2E8B57']
 concept_colors = ['#1f77b4', '#ff7f0e', '#2ca02c', '#d62728', '#9467bd', '#8c564b', '#e377c2']
 plot_type = "bar"
@@ -1544,7 +1889,9 @@ plot_type = "bar"
 # stats_image_captions(ACs_list_names)
 # caption_words_co_occurences(ACs_list_names, consider_painting=False)
 
-
 ### Top colors
-stats_top_colors(ACs_list_names)
+# stats_top_colors(ACs_list_names, filter_grays_out=True)
+# colors_co_occurrences(ACs_list_names, filter_grays_out=False)
 
+### Emotions
+stats_emotions(ACs_list_names)
