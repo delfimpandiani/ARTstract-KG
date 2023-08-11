@@ -588,7 +588,7 @@ def stats_detected_objects(ACs_list_names):
         # find_top_objects(ACs_list_name)
         # find_top_relevant_objects(ACs_list_name)
         # find_top_relevant_objects_by_concept_w_freqs(ACs_list_name)
-        create_concepts_wordclouds(ACs_list_name)
+        # create_concepts_wordclouds(ACs_list_name)
     return
 
 def object_co_occurence_heatmaps(ACs_list_names, consider_person):
@@ -1255,6 +1255,80 @@ def stats_top_colors(ACs_list_names, filter_grays_out):
         plt.savefig(save_filename)
         plt.show()
 
+    def plot_colors_frequencies_percentages(ACs_list_name, filter_grays_out):
+        color_frequencies_by_concept, all_color_frequencies = calculate_colors_frequencies(ACs_list_name)
+        num_concepts = len(color_frequencies_by_concept)
+        fig, axs = plt.subplots(num_concepts + 1, 1, figsize=(12, 5 * (num_concepts + 1)), sharex=True)
+
+        # Calculate top 30 colors across all concepts, excluding the top colors with "gray" in it
+        all_color_frequencies = {}
+        for concept, color_frequencies in color_frequencies_by_concept.items():
+            for color, freq in color_frequencies.items():
+                if filter_grays_out == True:
+                    if "gray" not in color:
+                        all_color_frequencies[color] = all_color_frequencies.get(color, 0) + freq
+                else:
+                    all_color_frequencies[color] = all_color_frequencies.get(color, 0) + freq
+
+        sorted_all_frequencies = sorted(all_color_frequencies.items(), key=lambda x: x[1], reverse=True)
+        top_all_colors, top_all_frequencies = zip(*sorted_all_frequencies[:30])
+
+        max_y_value = 0.18  # Set the maximum y-axis value to 1.0 (100%)
+
+        # Calculate the total number of images for calculating percentages
+        total_images = sum(all_color_frequencies.values())
+
+        # Plot the total color frequencies subplot
+        frequencies_total = [all_color_frequencies.get(color, 0) / total_images for color in top_all_colors]
+        axs[0].bar(top_all_colors, frequencies_total)
+        if filter_grays_out == True:
+            axs[0].set_title("Overall Color Frequencies (excluding 'gray' colors)")
+        else:
+            axs[0].set_title("Overall Color Frequencies")
+        axs[0].set_ylabel("Percentage of Images")
+        axs[0].tick_params(axis='x', rotation=45, labelsize=8)
+        axs[0].set_ylim(0, max_y_value)  # Set consistent y-axis limits
+
+        # Plot the color frequencies for each concept subplot
+        sorted_concepts = sorted(color_frequencies_by_concept.keys())  # Sort concepts alphabetically
+        for i, concept in enumerate(sorted_concepts, start=1):
+            color_frequencies = color_frequencies_by_concept[concept]
+            # Filter out colors containing "gray" in their names
+            if filter_grays_out == True:
+                filtered_color_frequencies = {color: freq for color, freq in color_frequencies.items() if
+                                              "gray" not in color.lower()}
+                sorted_frequencies = sorted(filtered_color_frequencies.items(), key=lambda x: x[1], reverse=True)
+            else:
+                filtered_color_frequencies = {color: freq for color, freq in color_frequencies.items()}
+                sorted_frequencies = sorted(filtered_color_frequencies.items(), key=lambda x: x[1], reverse=True)
+
+            colors, frequencies = zip(*sorted_frequencies[:30])
+
+            # Calculate the percentage of images for the current concept that have each color
+            total_images_concept = sum(color_frequencies.values())
+            frequencies_percentage = [freq / total_images_concept for freq in frequencies]
+
+            axs[i].bar(colors, frequencies_percentage)
+            if filter_grays_out == True:
+                axs[i].set_title(f"Color Frequencies for Concept '{concept}' (excluding 'gray' colors)")
+            else:
+                axs[i].set_title(f"Color Frequencies for Concept '{concept}'")
+            axs[i].set_title(f"Color Frequencies for Concept '{concept}'")
+            axs[i].set_ylabel("Percentage of Images")
+            axs[i].tick_params(axis='x', rotation=45, labelsize=8)
+            axs[i].set_ylim(0, max_y_value)  # Set consistent y-axis limits
+
+        plt.tight_layout()
+        plt.show()
+
+        # Save the plot as an image
+        if filter_grays_out == True:
+            save_filename = f"output_imgs/perceptual_data/color/filtered_grays_top_30_{ACs_list_name}.jpg"
+        else:
+            save_filename = f"output_imgs/perceptual_data/color/top_30_{ACs_list_name}.jpg"
+        plt.savefig(save_filename)
+        plt.show()
+        return
     def palette_colors_frequencies_with_palettes(ACs_list_name, filter_grays_out):
         color_frequencies_by_concept, all_color_frequencies = calculate_colors_frequencies(ACs_list_name)
         # Sort the concepts alphabetically
@@ -1634,7 +1708,7 @@ def stats_top_colors(ACs_list_names, filter_grays_out):
         ## EXECUTION
         # get_top_colors_by_concept(ACs_list_name)
         # calculate_colors_frequencies(ACs_list_name)
-        # plot_colors_frequencies(ACs_list_name)
+        plot_colors_frequencies_percentages(ACs_list_name, filter_grays_out=False)
         # palette_colors_frequencies_with_palettes(ACs_list_name,  filter_grays_out)
         # find_common_colors(ACs_list_name)
         # find_unique_colors(ACs_list_name)
@@ -1643,7 +1717,7 @@ def stats_top_colors(ACs_list_names, filter_grays_out):
         # find_top_relevant_colors(ACs_list_name)
         # find_top_relevant_colors_by_concept_w_freqs(ACs_list_name)
         # create_colors_wordclouds(ACs_list_name)
-        create_colors_palettes(ACs_list_name)
+        # create_colors_palettes(ACs_list_name)
     return
 
 def colors_co_occurrences(ACs_list_names, filter_grays_out):
@@ -1745,7 +1819,6 @@ def colors_co_occurrences(ACs_list_names, filter_grays_out):
     return
 
 ## Emotions
-
 def stats_emotions(ACs_list_names):
     def get_emotions_by_concept(ACs_list_name):
         concept_images, merged_ARTstract = load_inputs(ACs_list_name)
@@ -1766,15 +1839,18 @@ def stats_emotions(ACs_list_names):
     def calculate_emotion_frequencies(ACs_list_name):
         emotions_by_concept, emotions_by_concept_w_strengths = get_emotions_by_concept(ACs_list_name)
         emotion_frequencies_by_concept = {}
+        all_detected_emotions = []
 
         for concept, emotions_list in emotions_by_concept.items():
             emotion_frequencies = Counter(emotions_list)
             emotion_frequencies_by_concept[concept] = emotion_frequencies
+            all_detected_emotions.extend(emotions_list)
 
-        return emotion_frequencies_by_concept
+        all_emotions_frequencies = Counter(all_detected_emotions)
+        return emotion_frequencies_by_concept, all_emotions_frequencies
 
     def plot_emotion_frequencies(ACs_list_name):
-        emotion_frequencies_by_concept = calculate_emotion_frequencies(ACs_list_name)
+        emotion_frequencies_by_concept, all_emotions_frequencies = calculate_emotion_frequencies(ACs_list_name)
         num_concepts = len(emotion_frequencies_by_concept)
         emotions = ["amusement", "awe", "anger", "contentment", "fear", "excitement", "sadness", "disgust",
                     "something else"]
@@ -1827,52 +1903,724 @@ def stats_emotions(ACs_list_names):
         plt.savefig(save_filename)
         plt.show()
 
-    def create_emotion_wordclouds(ACs_list_name):
+    def find_relevant_emotions(ACs_list_name):
+        emotion_frequencies_by_concept, all_emotions_frequencies = calculate_emotion_frequencies(ACs_list_name)
+        emotions = ["amusement", "awe", "anger", "contentment", "fear", "excitement", "sadness", "disgust",
+                    "something else"]
+
+        # Calculate overall frequency of each emotion across all concepts
+        all_emotions_frequencies = Counter()
+        for emotion_frequencies in emotion_frequencies_by_concept.values():
+            all_emotions_frequencies.update(emotion_frequencies)
+
+        relevant_emotions_by_concept = {}
+
+        for concept, emotion_frequencies in emotion_frequencies_by_concept.items():
+            # Calculate relative frequency (TF) for each emotion within the concept
+            relative_frequencies = {
+                emotion: freq / sum(emotion_frequencies.values())
+                for emotion, freq in emotion_frequencies.items()
+            }
+
+            # Calculate inverse concept frequency (IDF) for each emotion
+            num_concepts = len(emotion_frequencies_by_concept)
+            inverse_concept_frequency = {emotion: num_concepts / sum(
+                1 for emotion_frequencies in emotion_frequencies_by_concept.values() if emotion in emotion_frequencies)
+                                         for emotion in emotion_frequencies}
+
+            # Calculate relevance score for each emotion in the concept (TF * IDF)
+            relevance_scores = {emotion: round(relative_frequencies[emotion] * inverse_concept_frequency[emotion], 3)
+                                for emotion in emotion_frequencies}
+
+            # Sort emotions based on their relevance scores in descending order
+            sorted_relevance_scores = sorted(relevance_scores.items(), key=lambda x: x[1], reverse=True)
+
+            # Keep the top 4 emotions based on frequencies and the top 4 relevant emotions
+            top_frequencies_emotions = [emotion for emotion, score in
+                                        sorted(emotion_frequencies.items(), key=lambda x: x[1], reverse=True)[:4]]
+            top_relevance_emotions = [emotion for emotion, score in sorted_relevance_scores[:4]]
+            relevant_emotions_by_concept[concept] = (top_frequencies_emotions, top_relevance_emotions)
+
+        print(relevant_emotions_by_concept)
+        for concept, (freq_emotion_set, rel_emotion_set) in relevant_emotions_by_concept.items():
+            print(concept, "has top frequency emotions:", freq_emotion_set)
+            print(concept, "has top relevance emotions:", rel_emotion_set)
+        return relevant_emotions_by_concept
+
+    def create_emotion_wordclouds(ACs_list_name, threshold=0.5):
         emotions_by_concept, emotions_by_concept_w_strengths = get_emotions_by_concept(ACs_list_name)
         font_color = '#0074D9'  # Use any shade of blue you prefer
         helvetica_font = 'Helvetica.ttf'  # Replace with the path to your Helvetica font file
 
-        for concept, emotions_list in emotions_by_concept.items():
-            emotions_text = " ".join([emotion for emotion in emotions_list if emotion is not None])
+        for concept, emotions_with_strengths in emotions_by_concept_w_strengths.items():
+            emotions = [(emotion, strength) for emotion, strength in emotions_with_strengths]
+            emotions = {emotion: strength for emotion, strength in emotions}
+
+            emotions_above_threshold = [(emotion, strength) for emotion, strength in emotions_with_strengths if
+                                        strength >= threshold]
+            emotions_above_threshold = {emotion: strength for emotion, strength in emotions_above_threshold}
 
             wc_emotions = WordCloud(
                 collocations=False,
                 background_color='white',
                 font_path=helvetica_font,
                 color_func=lambda *args, **kwargs: font_color
-            ).generate(emotions_text)
+            ).generate_from_frequencies(emotions)
 
-            plt.imshow(wc_emotions, interpolation="bilinear")
-            plt.axis("off")
-            plt.title(f"Emotion Word Cloud for Concept: {concept}")
+            wc_emotions_1 = WordCloud(
+                collocations=False,
+                background_color='white',
+                font_path=helvetica_font,
+                color_func=lambda *args, **kwargs: font_color
+            ).generate_from_frequencies(emotions_above_threshold)
+
+            # Plot the word clouds side by side
+            fig, axes = plt.subplots(1, 2, figsize=(12, 6))
+
+            axes[0].imshow(wc_emotions, interpolation="bilinear")
+            axes[0].axis("off")
+            axes[0].set_title(f"Emotions Word Cloud for: {concept} (no threshold)")
+
+            axes[1].imshow(wc_emotions_1, interpolation="bilinear")
+            axes[1].axis("off")
+            axes[1].set_title(f"Emotion Word Cloud for: {concept} ( threshold {threshold})")
+
             plt.show()
-
-            # Save the word cloud as an image
             save_filename = f"output_imgs/perceptual_data/emotion/wordclouds/emotion_wordcloud_{concept}_{ACs_list_name}.jpg"
-            wc_emotions.to_file(save_filename)
+            plt.savefig(save_filename)
+        return
 
     # List of concepts of interest
     concepts_of_interest = ['comfort', 'danger', 'death', 'fitness', 'freedom', 'power', 'safety']
-
-# something else
-
     for ACs_list_name in ACs_list_names:
         # get_emotions_by_concept(ACs_list_name)
         plot_emotion_frequencies(ACs_list_name)
         # create_emotion_wordclouds(ACs_list_name)
+        # find_relevant_emotions(ACs_list_name)
 
     return
 
+## Age
+def stats_age(ACs_list_names):
+    def get_ages_by_concept(ACs_list_name):
+        concept_images, merged_ARTstract = load_inputs(ACs_list_name)
+        ages_by_concept = {concept: [] for concept in concept_images}
+        ages_by_concept_w_strengths = {concept: [] for concept in concept_images}
+
+        for concept, images in concept_images.items():
+            for img in images:
+                for image_id, image_info in merged_ARTstract.items():
+                    if img == image_id:
+                        age_object = merged_ARTstract[img].get("age", {}).get("ARTstract_age_2023_06_26", {})
+                        age = age_object['age_tier']
+                        age_strength = age_object['annotation_strength']
+                        ages_by_concept[concept].append(age)
+                        ages_by_concept_w_strengths[concept].append((age, age_strength))
+        return ages_by_concept, ages_by_concept_w_strengths
+
+    def calculate_age_frequencies(ACs_list_name):
+        ages_by_concept, ages_by_concept_w_strengths = get_ages_by_concept(ACs_list_name)
+        age_frequencies_by_concept = {}
+        all_detected_ages = []
+
+        for concept, ages_list in ages_by_concept.items():
+            age_frequencies = Counter(ages_list)
+            age_frequencies_by_concept[concept] = age_frequencies
+            all_detected_ages.extend(ages_list)
+
+        all_ages_frequencies = Counter(all_detected_ages)
+        return age_frequencies_by_concept, all_ages_frequencies
+
+    def plot_age_frequencies(ACs_list_name):
+        age_frequencies_by_concept, all_ages_frequencies = calculate_age_frequencies(ACs_list_name)
+        num_concepts = len(age_frequencies_by_concept)
+        ages = ['0-2', '3-9', '10-19', '20-29', '30-39', '40-49', '50-59', '60-69', '70+']
+        fig, axs = plt.subplots(num_concepts + 1, 1, figsize=(12, 5 * (num_concepts + 1)), sharex=True)
+
+        # Calculate the total number of images for each concept
+        total_images_by_concept = {concept: sum(age_frequencies.values()) for concept, age_frequencies in
+                                   age_frequencies_by_concept.items()}
+
+        max_y_value = 1  # Set the maximum y-axis value to 1
+
+        # Calculate the total number of images across all concepts
+        total_images = sum(total_images_by_concept.values())
+
+        # Calculate the total age frequencies subplot as a percentage of total images
+        frequencies_total = [all_ages_frequencies.get(age, 0) / total_images * 100 for age in ages]
+
+        axs[0].bar(ages, frequencies_total)
+        axs[0].set_title("Overall Age Frequencies")
+        axs[0].set_ylabel("Percentage of Images")
+        axs[0].tick_params(axis='x', rotation=45, labelsize=8)
+        axs[0].set_ylim(0, 100)  # Set y-axis limits to 0-100 for percentage scale
+
+        # Plot the age frequencies for each concept subplot
+        sorted_concepts = sorted(age_frequencies_by_concept.keys())  # Sort concepts alphabetically
+        ordered_ages = ages  # Use the predefined order of ages
+
+        for i, concept in enumerate(sorted_concepts, start=1):
+            age_frequencies = age_frequencies_by_concept[concept]
+            frequencies = [age_frequencies.get(age, 0) / total_images_by_concept[concept] for age in ordered_ages]
+            axs[i].bar(ordered_ages, frequencies)
+            axs[i].set_title(f"Age Frequencies for Concept '{concept}'")
+            axs[i].set_ylabel("Percentage of Images")
+            axs[i].tick_params(axis='x', rotation=45, labelsize=8)
+            axs[i].set_ylim(0, max_y_value)  # Set consistent y-axis limits
+
+        plt.tight_layout()
+        plt.show()
+
+        # Save the plot as an image
+        save_filename = f"output_imgs/perceptual_data/age/age_frequencies_{ACs_list_name}.jpg"
+        plt.savefig(save_filename)
+        plt.show()
+        return
+
+    def find_relevant_ages(ACs_list_name):
+        age_frequencies_by_concept, all_ages_frequencies = calculate_age_frequencies(ACs_list_name)
+        ages = ['0-2','3-9', '10-19', '20-29', '30-39', '40-49', '50-59', '60-69', '70+']
+
+        # Calculate the overall age frequencies across all concepts
+        all_age_frequencies = Counter()
+        for age_frequencies in age_frequencies_by_concept.values():
+            all_age_frequencies.update(age_frequencies)
+
+        relevant_ages_by_concept = {}
+
+        for concept, age_frequencies in age_frequencies_by_concept.items():
+            # Calculate relative frequency (TF) for each emotion within the concept
+            relative_frequencies = {
+                age: freq / sum(age_frequencies.values())
+                for age, freq in age_frequencies.items()
+            }
+
+            # Calculate inverse concept frequency (IDF) for each emotion
+            num_concepts = len(age_frequencies_by_concept)
+            inverse_concept_frequency = {age: num_concepts / sum(
+                1 for age_frequencies in age_frequencies_by_concept.values() if age in age_frequencies)
+                                         for age in age_frequencies}
+
+            # Calculate relevance score for each emotion in the concept (TF * IDF)
+            relevance_scores = {age: round(relative_frequencies[age] * inverse_concept_frequency[age], 3)
+                                for age in age_frequencies}
+
+            # Sort emotions based on their relevance scores in descending order
+            sorted_relevance_scores = sorted(relevance_scores.items(), key=lambda x: x[1], reverse=True)
+
+            # Keep the top 4 emotions based on frequencies and the top 4 relevant emotions
+            top_frequencies_ages = [age for age, score in
+                                        sorted(age_frequencies.items(), key=lambda x: x[1], reverse=True)[:4]]
+            top_relevance_ages = [age for age, score in sorted_relevance_scores[:4]]
+            relevant_ages_by_concept[concept] = (top_frequencies_ages, top_relevance_ages)
+
+        print(relevant_ages_by_concept)
+        for concept, (freq_age_set, rel_age_set) in relevant_ages_by_concept.items():
+            print(concept, "has top frequency ages:", freq_age_set)
+            print(concept, "has top relevance ages:", rel_age_set)
+        return relevant_ages_by_concept
+
+    def create_age_wordclouds(ACs_list_name, threshold=0.5):
+        ages_by_concept, ages_by_concept_w_strengths = get_ages_by_concept(ACs_list_name)
+        font_color = '#0074D9'  # Use any shade of blue you prefer
+        helvetica_font = 'Helvetica.ttf'
+
+        for concept, ages_with_strengths in ages_by_concept_w_strengths.items():
+            ages = [(age, strength) for age, strength in ages_with_strengths]
+            ages = {age: strength for age, strength in ages}
+
+            ages_above_threshold = [(age, strength) for age, strength in ages_with_strengths if
+                                        strength >= threshold]
+            ages_above_threshold = {age: strength for age, strength in ages_above_threshold}
+
+            wc_emotions = WordCloud(
+                collocations=False,
+                background_color='white',
+                font_path=helvetica_font,
+                color_func=lambda *args, **kwargs: font_color
+            ).generate_from_frequencies(ages)
+
+            wc_emotions_1 = WordCloud(
+                collocations=False,
+                background_color='white',
+                font_path=helvetica_font,
+                color_func=lambda *args, **kwargs: font_color
+            ).generate_from_frequencies(ages_above_threshold)
+
+            # Plot the word clouds side by side
+            fig, axes = plt.subplots(1, 2, figsize=(12, 6))
+
+            axes[0].imshow(wc_emotions, interpolation="bilinear")
+            axes[0].axis("off")
+            axes[0].set_title(f"Age Tiers Word Cloud for: {concept} (no threshold)")
+
+            axes[1].imshow(wc_emotions_1, interpolation="bilinear")
+            axes[1].axis("off")
+            axes[1].set_title(f"Age Tiers Word Cloud for: {concept} ( threshold {threshold})")
+
+            plt.show()
+            save_filename = f"output_imgs/perceptual_data/age/wordclouds/age_wordcloud_{concept}_{ACs_list_name}.jpg"
+            plt.savefig(save_filename)
+        return
+
+    # List of concepts of interest
+    concepts_of_interest = ['comfort', 'danger', 'death', 'fitness', 'freedom', 'power', 'safety']
+    for ACs_list_name in ACs_list_names:
+        # get_ages_by_concept(ACs_list_name)
+        plot_age_frequencies(ACs_list_name)
+        # find_relevant_ages(ACs_list_name)
+        # create_age_wordclouds(ACs_list_name)
+
+    return
+
+## Art Style
+def stats_art_style(ACs_list_names):
+    def get_art_styles_by_concept(ACs_list_name):
+        concept_images, merged_ARTstract = load_inputs(ACs_list_name)
+        art_styles_by_concept = {concept: [] for concept in concept_images}
+        art_styles_by_concept_w_strengths = {concept: [] for concept in concept_images}
+
+        for concept, images in concept_images.items():
+            for img in images:
+                for image_id, image_info in merged_ARTstract.items():
+                    if img == image_id:
+                        art_style_object = merged_ARTstract[img].get("as", {}).get("ARTstract_as_2023_06_26", {})
+                        art_style = art_style_object['art_style']
+                        art_style_strength = art_style_object['annotation_strength']
+                        art_styles_by_concept[concept].append(art_style)
+                        art_styles_by_concept_w_strengths[concept].append((art_style, art_style_strength))
+        return art_styles_by_concept, art_styles_by_concept_w_strengths
+
+    def calculate_art_style_frequencies(ACs_list_name):
+        art_styles_by_concept, art_styles_by_concept_w_strengths = get_art_styles_by_concept(ACs_list_name)
+        art_style_frequencies_by_concept = {}
+        all_detected_art_styles = []
+
+        for concept, art_styles_list in art_styles_by_concept.items():
+            art_style_frequencies = Counter(art_styles_list)
+            art_style_frequencies_by_concept[concept] = art_style_frequencies
+            all_detected_art_styles.extend(art_styles_list)
+
+        all_art_styles_frequencies = Counter(all_detected_art_styles)
+        return art_style_frequencies_by_concept, all_art_styles_frequencies
+
+    def plot_art_style_frequencies(ACs_list_name):
+        art_style_frequencies_by_concept, all_art_styles_frequencies = calculate_art_style_frequencies(ACs_list_name)
+        num_concepts = len(art_style_frequencies_by_concept)
+        art_styles = ["Art Nouveau", "Baroque", "Expressionism", "Impressionism", "Post-Impressionism", "Realism",
+                      "Renaissance", "Romanticism", "Surrealism", "Ukiyo-e"]
+        fig, axs = plt.subplots(num_concepts + 1, 1, figsize=(12, 5 * (num_concepts + 1)), sharex=True)
+
+        # Calculate the total number of images for each concept
+        total_images_by_concept = {concept: sum(art_style_frequencies.values()) for concept, art_style_frequencies in
+                                   art_style_frequencies_by_concept.items()}
+
+        max_y_value = 1  # Set the maximum y-axis value to 1
+
+        # Calculate the total number of images across all concepts
+        total_images = sum(total_images_by_concept.values())
+
+        # Calculate the total art style frequencies subplot as a percentage of total images
+        frequencies_total = [all_art_styles_frequencies.get(art_style, 0) / total_images * 100 for art_style in
+                             art_styles]
+
+        axs[0].bar(art_styles, frequencies_total)
+        axs[0].set_title("Overall Art Style Frequencies")
+        axs[0].set_ylabel("Percentage of Images")
+        axs[0].tick_params(axis='x', rotation=45, labelsize=8)
+        axs[0].set_ylim(0, 100)  # Set y-axis limits to 0-100 for percentage scale
+
+        # Plot the art style frequencies for each concept subplot
+        sorted_concepts = sorted(art_style_frequencies_by_concept.keys())  # Sort concepts alphabetically
+        ordered_art_styles = art_styles  # Use the predefined order of art styles
+
+        for i, concept in enumerate(sorted_concepts, start=1):
+            art_style_frequencies = art_style_frequencies_by_concept[concept]
+            frequencies = [art_style_frequencies.get(art_style, 0) / total_images_by_concept[concept] for art_style in
+                           ordered_art_styles]
+            axs[i].bar(ordered_art_styles, frequencies)
+            axs[i].set_title(f"Art Style Frequencies for Concept '{concept}'")
+            axs[i].set_ylabel("Percentage of Images")
+            axs[i].tick_params(axis='x', rotation=45, labelsize=8)
+            axs[i].set_ylim(0, max_y_value)  # Set consistent y-axis limits
+
+        plt.tight_layout()
+        plt.show()
+
+        # Save the plot as an image
+        save_filename = f"output_imgs/perceptual_data/art_style/art_style_frequencies_{ACs_list_name}.jpg"
+        plt.savefig(save_filename)
+        plt.show()
+
+    def find_relevant_art_styles(ACs_list_name):
+        art_style_frequencies_by_concept, all_art_styles_frequencies = calculate_art_style_frequencies(ACs_list_name)
+
+        # Calculate the overall art style frequencies across all concepts
+        all_art_style_frequencies = Counter()
+        for art_style_frequencies in art_style_frequencies_by_concept.values():
+            all_art_style_frequencies.update(art_style_frequencies)
+
+        relevant_art_styles_by_concept = {}
+
+        for concept, art_style_frequencies in art_style_frequencies_by_concept.items():
+            # Calculate relative frequency (TF) for each art style within the concept
+            relative_frequencies = {
+                art_style: freq / sum(art_style_frequencies.values())
+                for art_style, freq in art_style_frequencies.items()
+            }
+
+            # Calculate inverse concept frequency (IDF) for each art style
+            num_concepts = len(art_style_frequencies_by_concept)
+            inverse_concept_frequency = {art_style: num_concepts / sum(
+                1 for art_style_frequencies in art_style_frequencies_by_concept.values() if art_style in art_style_frequencies)
+                                         for art_style in art_style_frequencies}
+
+            # Calculate relevance score for each art style in the concept (TF * IDF)
+            relevance_scores = {art_style: round(relative_frequencies[art_style] * inverse_concept_frequency[art_style], 3)
+                                for art_style in art_style_frequencies}
+
+            # Sort art styles based on their relevance scores in descending order
+            sorted_relevance_scores = sorted(relevance_scores.items(), key=lambda x: x[1], reverse=True)
+
+            # Keep the top 4 art styles based on frequencies and the top 4 relevant art styles
+            top_frequencies_art_styles = [art_style for art_style, score in
+                                          sorted(art_style_frequencies.items(), key=lambda x: x[1], reverse=True)[:4]]
+            top_relevance_art_styles = [art_style for art_style, score in sorted_relevance_scores[:4]]
+            relevant_art_styles_by_concept[concept] = (top_frequencies_art_styles, top_relevance_art_styles)
+
+        print(relevant_art_styles_by_concept)
+        for concept, (freq_art_style_set, rel_art_style_set) in relevant_art_styles_by_concept.items():
+            print(concept, "has top frequency art styles:", freq_art_style_set)
+            print(concept, "has top relevance art styles:", rel_art_style_set)
+        return relevant_art_styles_by_concept
+
+    def create_art_style_wordclouds(ACs_list_name, threshold=0.5):
+        art_styles_by_concept, art_styles_by_concept_w_strengths = get_art_styles_by_concept(ACs_list_name)
+        font_color = '#0074D9'  # Use any shade of blue you prefer
+        helvetica_font = 'Helvetica.ttf'
+
+        for concept, art_styles_with_strengths in art_styles_by_concept_w_strengths.items():
+            art_styles = [(art_style, strength) for art_style, strength in art_styles_with_strengths]
+            art_styles = {art_style: strength for art_style, strength in art_styles}
+
+            art_styles_above_threshold = [(art_style, strength) for art_style, strength in art_styles_with_strengths if
+                                        strength >= threshold]
+            art_styles_above_threshold = {art_style: strength for art_style, strength in art_styles_above_threshold}
+
+            wc_art_styles = WordCloud(
+                collocations=False,
+                background_color='white',
+                font_path=helvetica_font,
+                color_func=lambda *args, **kwargs: font_color
+            ).generate_from_frequencies(art_styles)
+
+            wc_art_styles_1 = WordCloud(
+                collocations=False,
+                background_color='white',
+                font_path=helvetica_font,
+                color_func=lambda *args, **kwargs: font_color
+            ).generate_from_frequencies(art_styles_above_threshold)
+
+            # Plot the word clouds side by side
+            fig, axes = plt.subplots(1, 2, figsize=(12, 6))
+
+            axes[0].imshow(wc_art_styles, interpolation="bilinear")
+            axes[0].axis("off")
+            axes[0].set_title(f"Art Styles Word Cloud for: {concept} (no threshold)")
+
+            axes[1].imshow(wc_art_styles_1, interpolation="bilinear")
+            axes[1].axis("off")
+            axes[1].set_title(f"Art Style Word Cloud for: {concept} ( threshold {threshold})")
+
+            plt.show()
+            save_filename = f"output_imgs/perceptual_data/art_style/wordclouds/art_style_wordcloud_{concept}_{ACs_list_name}.jpg"
+            plt.savefig(save_filename)
+        return
+
+    # List of concepts of interest
+    concepts_of_interest = ['comfort', 'danger', 'death', 'fitness', 'freedom', 'power', 'safety']
+    for ACs_list_name in ACs_list_names:
+        # get_art_styles_by_concept(ACs_list_name)
+        plot_art_style_frequencies(ACs_list_name)
+        # find_relevant_art_styles(ACs_list_name)
+        # create_art_style_wordclouds(ACs_list_name)
+
+    return
+
+## Action
+def stats_action(ACs_list_names):
+    def get_actions_by_concept(ACs_list_name):
+        concept_images, merged_ARTstract = load_inputs(ACs_list_name)
+        actions_by_concept = {concept: [] for concept in concept_images}
+        actions_by_concept_w_strengths = {concept: [] for concept in concept_images}
+
+        for concept, images in concept_images.items():
+            for img in images:
+                for image_id, image_info in merged_ARTstract.items():
+                    if img == image_id:
+                        action_object = merged_ARTstract[img].get("act", {}).get("ARTstract_act_2023_06_28", {})
+                        action = action_object['action_label']
+                        action_strength = action_object['annotation_strength']
+                        actions_by_concept[concept].append(action)
+                        actions_by_concept_w_strengths[concept].append((action, action_strength))
+        return actions_by_concept, actions_by_concept_w_strengths
+
+    def calculate_action_frequencies(ACs_list_name):
+        actions_by_concept, actions_by_concept_w_strengths = get_actions_by_concept(ACs_list_name)
+        action_frequencies_by_concept = {}
+        all_detected_actions = []
+
+        for concept, actions_list in actions_by_concept.items():
+            action_frequencies = Counter(actions_list)
+            action_frequencies_by_concept[concept] = action_frequencies
+            all_detected_actions.extend(actions_list)
+
+        all_actions_frequencies = Counter(all_detected_actions)
+        return action_frequencies_by_concept, all_actions_frequencies
+
+    def plot_action_frequencies(ACs_list_name):
+        action_frequencies_by_concept, all_actions_frequencies = calculate_action_frequencies(ACs_list_name)
+        num_concepts = len(action_frequencies_by_concept)
+        actions = [
+            "calling",
+            "clapping",
+            "cycling",
+            "dancing",
+            "drinking",
+            "eating",
+            "fighting",
+            "hugging",
+            "laughing",
+            "listening_to_music",
+            "running",
+            "sitting",
+            "sleeping",
+            "texting",
+            "using_laptop"
+        ]
+        fig, axs = plt.subplots(num_concepts + 1, 1, figsize=(12, 5 * (num_concepts + 1)), sharex=True)
+
+        # Calculate the total number of images for each concept
+        total_images_by_concept = {concept: sum(action_frequencies.values()) for concept, action_frequencies in
+                                   action_frequencies_by_concept.items()}
+
+        max_y_value = 1  # Set the maximum y-axis value to 1
+
+        # Calculate the total number of images across all concepts
+        total_images = sum(total_images_by_concept.values())
+
+        # Calculate the total action frequencies subplot as a percentage of total images
+        frequencies_total = [all_actions_frequencies.get(action, 0) / total_images * 100 for action in actions]
+
+        axs[0].bar(actions, frequencies_total)
+        axs[0].set_title("Overall Action Frequencies")
+        axs[0].set_ylabel("Percentage of Images")
+        axs[0].tick_params(axis='x', rotation=45, labelsize=8)
+        axs[0].set_ylim(0, 100)  # Set y-axis limits to 0-100 for percentage scale
+
+        # Plot the action frequencies for each concept subplot
+        sorted_concepts = sorted(action_frequencies_by_concept.keys())  # Sort concepts alphabetically
+        ordered_actions = actions  # Use the predefined order of actions
+
+        for i, concept in enumerate(sorted_concepts, start=1):
+            action_frequencies = action_frequencies_by_concept[concept]
+            frequencies = [action_frequencies.get(action, 0) / total_images_by_concept[concept] for action in
+                           ordered_actions]
+            axs[i].bar(ordered_actions, frequencies)
+            axs[i].set_title(f"Action Frequencies for Concept '{concept}'")
+            axs[i].set_ylabel("Percentage of Images")
+            axs[i].tick_params(axis='x', rotation=45, labelsize=8)
+            axs[i].set_ylim(0, max_y_value)  # Set consistent y-axis limits
+
+        plt.tight_layout()
+        plt.show()
+
+        # Save the plot as an image
+        save_filename = f"output_imgs/perceptual_data/action/action_frequencies_{ACs_list_name}.jpg"
+        plt.savefig(save_filename)
+        plt.show()
+
+    def find_relevant_actions(ACs_list_name):
+        action_frequencies_by_concept, all_actions_frequencies = calculate_action_frequencies(ACs_list_name)
+
+        # Calculate the overall action frequencies across all concepts
+        all_action_frequencies = Counter()
+        for action_frequencies in action_frequencies_by_concept.values():
+            all_action_frequencies.update(action_frequencies)
+
+        relevant_actions_by_concept = {}
+
+        for concept, action_frequencies in action_frequencies_by_concept.items():
+            # Calculate relative frequency (TF) for each action within the concept
+            relative_frequencies = {
+                action: freq / sum(action_frequencies.values())
+                for action, freq in action_frequencies.items()
+            }
+
+            # Calculate inverse concept frequency (IDF) for each action
+            num_concepts = len(action_frequencies_by_concept)
+            inverse_concept_frequency = {action: num_concepts / sum(
+                1 for action_frequencies in action_frequencies_by_concept.values() if action in action_frequencies)
+                                         for action in action_frequencies}
+
+            # Calculate relevance score for each action in the concept (TF * IDF)
+            relevance_scores = {action: round(relative_frequencies[action] * inverse_concept_frequency[action], 3)
+                                for action in action_frequencies}
+
+            # Sort actions based on their relevance scores in descending order
+            sorted_relevance_scores = sorted(relevance_scores.items(), key=lambda x: x[1], reverse=True)
+
+            # Keep the top 4 actions based on frequencies and the top 4 relevant actions
+            top_frequencies_actions = [action for action, score in
+                                       sorted(action_frequencies.items(), key=lambda x: x[1], reverse=True)[:4]]
+            top_relevance_actions = [action for action, score in sorted_relevance_scores[:4]]
+            relevant_actions_by_concept[concept] = (top_frequencies_actions, top_relevance_actions)
+
+        print(relevant_actions_by_concept)
+        for concept, (freq_action_set, rel_action_set) in relevant_actions_by_concept.items():
+            print(concept, "has top frequency actions:", freq_action_set)
+            print(concept, "has top relevance actions:", rel_action_set)
+        return relevant_actions_by_concept
+
+    def create_action_wordclouds(ACs_list_name, threshold=0.9):
+        actions_by_concept, actions_by_concept_w_strengths = get_actions_by_concept(ACs_list_name)
+        font_color = '#0074D9'  # Use any shade of blue you prefer
+        helvetica_font = 'Helvetica.ttf'
+
+        for concept, actions_with_strengths in actions_by_concept_w_strengths.items():
+            actions = [(action, strength) for action, strength in actions_with_strengths]
+            actions = {action: strength for action, strength in actions}
+
+            actions_above_threshold = [(action, strength) for action, strength in actions_with_strengths if
+                                       strength >= threshold]
+            actions_above_threshold = {action: strength for action, strength in actions_above_threshold}
+
+            wc_actions = WordCloud(
+                collocations=False,
+                background_color='white',
+                font_path=helvetica_font,
+                color_func=lambda *args, **kwargs: font_color
+            ).generate_from_frequencies(actions)
+
+            wc_actions_1 = WordCloud(
+                collocations=False,
+                background_color='white',
+                font_path=helvetica_font,
+                color_func=lambda *args, **kwargs: font_color
+            ).generate_from_frequencies(actions_above_threshold)
+
+            # Plot the word clouds side by side
+            fig, axes = plt.subplots(1, 2, figsize=(12, 6))
+
+            axes[0].imshow(wc_actions, interpolation="bilinear")
+            axes[0].axis("off")
+            axes[0].set_title(f"Actions Word Cloud for: {concept} (no threshold)")
+
+            axes[1].imshow(wc_actions_1, interpolation="bilinear")
+            axes[1].axis("off")
+            axes[1].set_title(f"Actions Word Cloud for: {concept} ( threshold {threshold})")
+
+            plt.show()
+            save_filename = f"output_imgs/perceptual_data/action/wordclouds/action_wordcloud_{concept}_{ACs_list_name}.jpg"
+            plt.savefig(save_filename)
+        return
+
+    # List of concepts of interest
+    concepts_of_interest = ['comfort', 'danger', 'death', 'fitness', 'freedom', 'power', 'safety']
+    for ACs_list_name in ACs_list_names:
+        # get_action_frequencies(ACs_list_name)
+        # plot_action_frequencies(ACs_list_name)
+        # find_relevant_actions(ACs_list_name)
+        create_action_wordclouds(ACs_list_name)
+    return
+
+## Human Presence
+def stats_hp(ACs_list_names):
+    def get_human_presence_by_concept(ACs_list_name):
+        concept_images, merged_ARTstract = load_inputs(ACs_list_name)
+        human_presence_by_concept = {concept: [] for concept in concept_images}
+        human_presence_by_concept_w_strengths = {concept: [] for concept in concept_images}
+        for concept, images in concept_images.items():
+            for img in images:
+                for image_id, image_info in merged_ARTstract.items():
+                    if img == image_id:
+                        hp_object = merged_ARTstract[img].get("hp", {}).get("ARTstract_hp_2023_06_26", {})
+                        hp = hp_object['human_presence']
+                        hp_strength = hp_object['annotation_strength']
+                        human_presence_by_concept[concept].append(hp)
+                        human_presence_by_concept_w_strengths[concept].append((hp, hp_strength))
+        return human_presence_by_concept, human_presence_by_concept_w_strengths
+
+    def calculate_human_presence_frequencies(ACs_list_name):
+        human_presence_by_concept, human_presence_by_concept_w_strengths = get_human_presence_by_concept(ACs_list_name)
+        human_presence_frequencies_by_concept = {}
+
+        for concept, human_presence_list in human_presence_by_concept.items():
+            human_presence_frequencies = Counter(human_presence_list)
+            human_presence_frequencies_by_concept[concept] = human_presence_frequencies
+
+        return human_presence_frequencies_by_concept
+
+    def plot_human_presence_frequencies(ACs_list_name):
+        human_presence_frequencies_by_concept = calculate_human_presence_frequencies(ACs_list_name)
+        num_concepts = len(human_presence_frequencies_by_concept)
+        presence_labels = ["False", "True"]
+        fig, axs = plt.subplots(num_concepts + 1, 1, figsize=(12, 5 * (num_concepts + 1)), sharex=True)
+
+        # Calculate the total number of images for each concept
+        total_images_by_concept = {concept: sum(presence_frequencies.values()) for concept, presence_frequencies in
+                                   human_presence_frequencies_by_concept.items()}
+
+        max_y_value = 100  # Set the maximum y-axis value to 100 to represent percentages
+
+        # Calculate the total number of images across all concepts
+        total_images = sum(total_images_by_concept.values())
+
+        # Calculate the total human presence frequencies subplot as a percentage of total images
+        frequencies_total = [
+            sum(presence_frequencies.get(presence_label, 0) for presence_frequencies in
+                human_presence_frequencies_by_concept.values()) / total_images * 100
+            for presence_label in presence_labels]
+
+        axs[0].bar(presence_labels, frequencies_total)
+        axs[0].set_title("Overall Human Presence Frequencies")
+        axs[0].set_ylabel("Percentage of Images")
+        axs[0].tick_params(axis='x', rotation=45, labelsize=8)
+        axs[0].set_ylim(0, max_y_value)  # Set y-axis limits to 0-100 for percentage scale
+
+        for i, (concept, presence_frequencies) in enumerate(human_presence_frequencies_by_concept.items(), start=1):
+            frequencies = [presence_frequencies.get(presence_label, 0) / total_images_by_concept[concept] * 100 for
+                           presence_label in presence_labels]
+            axs[i].bar(presence_labels, frequencies)
+            axs[i].set_title(f"Human Presence Frequencies for Concept '{concept}'")
+            axs[i].set_ylabel("Percentage of Images")
+            axs[i].tick_params(axis='x', rotation=45, labelsize=8)
+            axs[i].set_ylim(0, max_y_value)  # Set consistent y-axis limits
+
+        plt.tight_layout()
+        plt.show()
+
+        # Save the plot as an image
+        save_filename = f"output_imgs/perceptual_data/human_presence/human_presence_frequencies_{ACs_list_name}.jpg"
+        plt.savefig(save_filename)
+        plt.show()
+
+    # List of concepts of interest
+    concepts_of_interest = ['comfort', 'danger', 'death', 'fitness', 'freedom', 'power', 'safety']
+    for ACs_list_name in ACs_list_names:
+        plot_human_presence_frequencies(ACs_list_name)
+
+    return
 
 # Execution input examples
-# ACs_list_names = ["ARTstract_ACs_lists", "Balanced_ARTstract_ACs_lists"]
-ACs_list_names = ["Balanced_ARTstract_ACs_lists"]
+ACs_list_names = ["ARTstract_ACs_lists", "Balanced_ARTstract_ACs_lists"]
+# ACs_list_names = ["Balanced_ARTstract_ACs_lists"]
 dataset_colors = ['#00BFFF', '#FF6F61', '#9370DB', '#2E8B57']
 concept_colors = ['#1f77b4', '#ff7f0e', '#2ca02c', '#d62728', '#9467bd', '#8c564b', '#e377c2']
 plot_type = "bar"
 
 
-## EXECUTION
+############# EXECUTION
 
 ### Concept frequencies over different source datasets
 # stats_concept_frequencies(ACs_list_names, dataset_colors, concept_colors)
@@ -1894,4 +2642,16 @@ plot_type = "bar"
 # colors_co_occurrences(ACs_list_names, filter_grays_out=False)
 
 ### Emotions
-stats_emotions(ACs_list_names)
+# stats_emotions(ACs_list_names)
+
+### Ages
+# stats_age(ACs_list_names)
+
+### Art Style
+# stats_art_style(ACs_list_names)
+
+### Actions
+# stats_action(ACs_list_names)
+
+## Human Presence
+# stats_hp(ACs_list_names)
