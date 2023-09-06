@@ -16,7 +16,7 @@
             "detection_threshold": "top one",
             "annotated_dataset": "ARTstract"
         },
-        "ARTstract_art_style_2023_06_26": {
+        "ARTstract_as_2023_06_26": {
             "annotation_type": "as",
             "annotator": "oschamp/vit-artworkclassifier",
             "annotation_place": "Italy",
@@ -32,7 +32,7 @@
             "detection_threshold": "top five",
             "annotated_dataset": "ARTstract"
         },
-        "ARTstract_emo_2023_06_26": {
+        "ARTstract_em_2023_06_26": {
             "annotation_type": "em",
             "annotator": "artemis_image-emotion-classifier",
             "annotation_place": "Italy",
