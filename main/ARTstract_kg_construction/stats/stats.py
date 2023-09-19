@@ -17,13 +17,14 @@ from nltk.corpus import stopwords
 from nltk.stem import PorterStemmer, WordNetLemmatizer
 from nltk.tokenize import word_tokenize
 from wordcloud import WordCloud, get_single_color_func
+from collections import defaultdict
 
 matplotlib.use('Agg')
 plt.interactive(False)
 nltk.download('stopwords')
 nltk.download('punkt')
 nltk.download('wordnet')
-
+import random
 
 def load_inputs(ACs_list_name):
     with open(f"../input/{ACs_list_name}.json", "r") as file:
@@ -53,10 +54,10 @@ def stats_concept_frequencies(ACs_list_names, dataset_colors, concept_colors):
                     concept_frequency[concept][dataset] += 1
 
         # Print the results
-        # for concept, frequencies in concept_frequency.items():
-        #     print(f"Concept: {concept}")
-        #     for dataset, frequency in frequencies.items():
-        #         print(f"  Source Dataset: {dataset}, Frequency: {frequency}")
+        for concept, frequencies in concept_frequency.items():
+            print(f"Concept: {concept}")
+            for dataset, frequency in frequencies.items():
+                print(f"  Source Dataset: {dataset}, Frequency: {frequency}")
 
         return concept_frequency
 
@@ -206,7 +207,7 @@ def stats_num_detected_objects(ACs_list_names, dataset_colors, concept_colors, p
                         number_of_detected_objects = len(detected_objects)
                         detected_objects_by_concept[concept].extend(detected_objects)
                         num_detected_objects_by_concept[concept].append(number_of_detected_objects)
-        print(detected_objects_by_concept)
+        # print(detected_objects_by_concept)
         return num_detected_objects_by_concept, detected_objects_by_concept
 
     def calculate_average_num_detected_objects_by_concept(ACs_list_name):
@@ -284,6 +285,7 @@ def stats_detected_objects(ACs_list_names):
                         detected_objects = [detected_object["detected_object"] for detected_object in
                                             detected_objects_list]
                         detected_objects_by_concept[concept].extend(detected_objects)
+        # print(detected_objects_by_concept)
         return detected_objects_by_concept
 
     def calculate_object_frequencies(ACs_list_name):
@@ -423,9 +425,10 @@ def stats_detected_objects(ACs_list_names):
         # print(relevant_objects_by_concept)
         # for concept, od_set in relevant_objects_by_concept.items():
         #     print(concept, "has relevant concepts: ", od_set)
+        # print(relevant_objects_by_concept)
         return relevant_objects_by_concept
 
-    def find_top_objects(ACs_list_name, num_top_objects=15):
+    def find_top_objects(ACs_list_name, num_top_objects=10):
         object_frequencies_by_concept, all_object_frequencies = calculate_object_frequencies(ACs_list_name)
 
         top_objects_by_concept = {}
@@ -437,7 +440,7 @@ def stats_detected_objects(ACs_list_names):
             sorted_objects = sorted(objects_percentages.items(), key=lambda x: x[1], reverse=True)
             top_objects = dict(sorted_objects[:num_top_objects])
             top_objects_by_concept[concept] = top_objects
-        print("Top objects by concept: ", top_objects_by_concept)
+        # print("Top objects by concept: ", top_objects_by_concept)
         ordered_lists_by_concept = {}
         for concept, object_scores in top_objects_by_concept.items():
             # Sort objects based on their scores in descending order
@@ -477,8 +480,14 @@ def stats_detected_objects(ACs_list_names):
             top_relevant_objects_by_concept[concept] = [obj for obj, _ in sorted_objects[:k]]
             # Print the top relevant concepts
         # for concept, concepts in top_relevant_objects_by_concept.items():
-        #     print(concept, "has top relevant concepts:", concepts)
+        #     print(concept, "has top relevant objects:", concepts)
         # print(top_relevant_objects_by_concept)
+
+        file_path = "top_relevant_jsons/top_relevant_objects_by_concept.json"
+        # Using json.dump() to write the dictionary to a JSON file
+        with open(file_path, "w") as json_file:
+            json.dump(top_relevant_objects_by_concept, json_file)
+
         return top_relevant_objects_by_concept
 
     def find_top_relevant_objects_by_concept_w_freqs(ACs_list_name):
@@ -581,12 +590,12 @@ def stats_detected_objects(ACs_list_names):
         ## EXECUTION
         # get_detected_objects_by_concept(ACs_list_name)
         # calculate_object_frequencies(ACs_list_name)
-        plot_object_frequencies(ACs_list_name)
+        # plot_object_frequencies(ACs_list_name)
         # find_common_objects(ACs_list_name)
         # find_unique_objects(ACs_list_name)
         # find_relevant_objects(ACs_list_name)
         # find_top_objects(ACs_list_name)
-        # find_top_relevant_objects(ACs_list_name)
+        find_top_relevant_objects(ACs_list_name)
         # find_top_relevant_objects_by_concept_w_freqs(ACs_list_name)
         # create_concepts_wordclouds(ACs_list_name)
     return
@@ -842,8 +851,8 @@ def stats_image_captions(ACs_list_names):
 
             relevant_caption_words_by_concept[concept] = unique_top_words
         #print(relevant_words_by_concept)
-        for concept, word_set in relevant_caption_words_by_concept.items():
-            print(concept, "has relevant concepts: ", word_set)
+        # for concept, word_set in relevant_caption_words_by_concept.items():
+        #     print(concept, "has relevant concepts: ", word_set)
 
         return relevant_caption_words_by_concept
     def find_top_caption_words_by_concept(ACs_list_name, k=15):
@@ -898,7 +907,14 @@ def stats_image_captions(ACs_list_names):
         # for concept, concepts in top_relevant_caption_words_by_concept.items():
         #     print(concept, "has top relevant concepts:", concepts)
         print(top_relevant_caption_words_by_concept)
+
+        file_path = "top_relevant_jsons/top_relevant_caption_words_by_concept.json"
+        # Using json.dump() to write the dictionary to a JSON file
+        with open(file_path, "w") as json_file:
+            json.dump(top_relevant_caption_words_by_concept, json_file)
+
         return top_relevant_caption_words_by_concept
+
     def find_top_relevant_objects_by_concept_w_freqs(ACs_list_name):
         top_relevant_caption_words_by_concept = find_top_relevant_caption_words_by_concept(ACs_list_name)
         word_frequencies_by_concept = calculate_caption_words_frequencies(ACs_list_name)
@@ -999,14 +1015,14 @@ def stats_image_captions(ACs_list_names):
         # get_image_captions_by_concept(ACs_list_name)
         # get_captions_text_by_concept(ACs_list_name)
         # calculate_caption_words_frequencies(ACs_list_name)
-        plot_caption_words_frequencies(ACs_list_name)
+        # plot_caption_words_frequencies(ACs_list_name)
         # find_common_words(ACs_list_name)
         # find_unique_caption_words(ACs_list_name)
         # find_relevant_caption_words_by_concept(ACs_list_name)
         # find_top_caption_words_by_concept(ACs_list_name)
-        # find_top_relevant_caption_words_by_concept(ACs_list_name)
+        find_top_relevant_caption_words_by_concept(ACs_list_name)
         # find_top_relevant_objects_by_concept_w_freqs(ACs_list_name)
-        create_caption_words_wordclouds(ACs_list_name)
+        # create_caption_words_wordclouds(ACs_list_name)
     return
 
 def caption_words_co_occurences(ACs_list_names, consider_painting):
@@ -1556,6 +1572,12 @@ def stats_top_colors(ACs_list_names, filter_grays_out):
         # for concept, concepts in top_relevant_objects_by_concept.items():
         #     print(concept, "has top relevant concepts:", concepts)
         # print(top_relevant_objects_by_concept)
+
+        file_path = "top_relevant_jsons/top_relevant_colors_by_concept.json"
+        # Using json.dump() to write the dictionary to a JSON file
+        with open(file_path, "w") as json_file:
+            json.dump(top_relevant_colors_by_concept, json_file)
+
         return top_relevant_colors_by_concept
 
     def find_top_relevant_colors_by_concept_w_freqs(ACs_list_name):
@@ -1708,13 +1730,13 @@ def stats_top_colors(ACs_list_names, filter_grays_out):
         ## EXECUTION
         # get_top_colors_by_concept(ACs_list_name)
         # calculate_colors_frequencies(ACs_list_name)
-        plot_colors_frequencies_percentages(ACs_list_name, filter_grays_out=False)
+        # plot_colors_frequencies_percentages(ACs_list_name, filter_grays_out=False)
         # palette_colors_frequencies_with_palettes(ACs_list_name,  filter_grays_out)
         # find_common_colors(ACs_list_name)
         # find_unique_colors(ACs_list_name)
         # find_relevant_colors(ACs_list_name)
         # find_top_colors(ACs_list_name)
-        # find_top_relevant_colors(ACs_list_name)
+        find_top_relevant_colors(ACs_list_name)
         # find_top_relevant_colors_by_concept_w_freqs(ACs_list_name)
         # create_colors_wordclouds(ACs_list_name)
         # create_colors_palettes(ACs_list_name)
@@ -1938,13 +1960,25 @@ def stats_emotions(ACs_list_names):
             # Keep the top 4 emotions based on frequencies and the top 4 relevant emotions
             top_frequencies_emotions = [emotion for emotion, score in
                                         sorted(emotion_frequencies.items(), key=lambda x: x[1], reverse=True)[:4]]
-            top_relevance_emotions = [emotion for emotion, score in sorted_relevance_scores[:4]]
+            top_relevance_emotions = [emotion for emotion, score in sorted_relevance_scores[:5]]
             relevant_emotions_by_concept[concept] = (top_frequencies_emotions, top_relevance_emotions)
 
-        print(relevant_emotions_by_concept)
-        for concept, (freq_emotion_set, rel_emotion_set) in relevant_emotions_by_concept.items():
-            print(concept, "has top frequency emotions:", freq_emotion_set)
-            print(concept, "has top relevance emotions:", rel_emotion_set)
+        # print(relevant_emotions_by_concept)
+        # for concept, (freq_emotion_set, rel_emotion_set) in relevant_emotions_by_concept.items():
+        #     print(concept, "has top frequency emotions:", freq_emotion_set)
+        #     print(concept, "has top relevance emotions:", rel_emotion_set)
+
+
+
+
+
+        file_path = "top_relevant_jsons/top_relevant_emotions_by_concept.json"
+        # Using json.dump() to write the dictionary to a JSON file
+        with open(file_path, "w") as json_file:
+            top_relevant_emotions_by_concept = {key: value[1] for key, value in relevant_emotions_by_concept.items() if value}
+
+            json.dump(top_relevant_emotions_by_concept, json_file)
+
         return relevant_emotions_by_concept
 
     def create_emotion_wordclouds(ACs_list_name, threshold=0.5):
@@ -1994,9 +2028,9 @@ def stats_emotions(ACs_list_names):
     concepts_of_interest = ['comfort', 'danger', 'death', 'fitness', 'freedom', 'power', 'safety']
     for ACs_list_name in ACs_list_names:
         # get_emotions_by_concept(ACs_list_name)
-        plot_emotion_frequencies(ACs_list_name)
+        # plot_emotion_frequencies(ACs_list_name)
         # create_emotion_wordclouds(ACs_list_name)
-        # find_relevant_emotions(ACs_list_name)
+        find_relevant_emotions(ACs_list_name)
 
     return
 
@@ -2111,13 +2145,71 @@ def stats_age(ACs_list_names):
             # Keep the top 4 emotions based on frequencies and the top 4 relevant emotions
             top_frequencies_ages = [age for age, score in
                                         sorted(age_frequencies.items(), key=lambda x: x[1], reverse=True)[:4]]
-            top_relevance_ages = [age for age, score in sorted_relevance_scores[:4]]
+            top_relevance_ages = [age for age, score in sorted_relevance_scores[:5]]
             relevant_ages_by_concept[concept] = (top_frequencies_ages, top_relevance_ages)
+        #
+        # print(relevant_ages_by_concept)
+        # for concept, (freq_age_set, rel_age_set) in relevant_ages_by_concept.items():
+        #     print(concept, "has top frequency ages:", freq_age_set)
+        #     print(concept, "has top relevance ages:", rel_age_set)
+        #
 
-        print(relevant_ages_by_concept)
-        for concept, (freq_age_set, rel_age_set) in relevant_ages_by_concept.items():
-            print(concept, "has top frequency ages:", freq_age_set)
-            print(concept, "has top relevance ages:", rel_age_set)
+
+        file_path = "top_relevant_jsons/top_relevant_ages_by_concept.json"
+        # Using json.dump() to write the dictionary to a JSON file
+        with open(file_path, "w") as json_file:
+            top_relevant_ages_by_concept = {key: value[1] for key, value in relevant_ages_by_concept.items() if value}
+
+            json.dump(top_relevant_ages_by_concept, json_file)
+
+        return relevant_ages_by_concept
+
+    def find_thresh_relevant_ages(ACs_list_name, threshold=0.5):
+        age_frequencies_by_concept, all_ages_frequencies = calculate_age_frequencies(ACs_list_name)
+
+        ages = ['0-2', '3-9', '10-19', '20-29', '30-39', '40-49', '50-59', '60-69', '70+']
+
+        # Calculate the overall age frequencies across all concepts
+        all_age_frequencies = Counter()
+        for age_frequencies in age_frequencies_by_concept.values():
+            all_age_frequencies.update(age_frequencies)
+
+        relevant_ages_by_concept = {}
+
+        for concept, age_frequencies in age_frequencies_by_concept.items():
+            # Calculate relative frequency (TF) for each age tier within the concept
+            relative_frequencies = {
+                age: freq / sum(age_frequencies.values())
+                for age, freq in age_frequencies.items()
+            }
+
+            # Calculate inverse concept frequency (IDF) for each age tier
+            num_concepts = len(age_frequencies_by_concept)
+            inverse_concept_frequency = {age: num_concepts / sum(
+                1 for age_frequencies in age_frequencies_by_concept.values() if age in age_frequencies)
+                                         for age in age_frequencies}
+
+            # Calculate relevance score for each age tier in the concept (TF * IDF)
+            relevance_scores = {age: round(relative_frequencies[age] * inverse_concept_frequency[age], 3)
+                                for age in age_frequencies}
+
+            # Filter age tiers based on the threshold
+            top_relevance_ages = [age for age, score in relevance_scores.items() if score >= threshold]
+
+            # Sort top relevance age tiers by their relevance scores in descending order
+            top_relevance_ages.sort(key=lambda age: relevance_scores[age], reverse=True)
+
+            # Keep the top 4 age tiers based on relevance score (or all if fewer than 4)
+            top_relevance_ages = top_relevance_ages[:5]
+
+            relevant_ages_by_concept[concept] = top_relevance_ages
+        file_path = "top_relevant_jsons/top_thresh_relevant_ages_by_concept.json"
+        # Using json.dump() to write the dictionary to a JSON file
+        with open(file_path, "w") as json_file:
+            top_relevant_ages_by_concept = relevant_ages_by_concept
+
+            json.dump(top_relevant_ages_by_concept, json_file)
+
         return relevant_ages_by_concept
 
     def create_age_wordclouds(ACs_list_name, threshold=0.5):
@@ -2167,8 +2259,8 @@ def stats_age(ACs_list_names):
     concepts_of_interest = ['comfort', 'danger', 'death', 'fitness', 'freedom', 'power', 'safety']
     for ACs_list_name in ACs_list_names:
         # get_ages_by_concept(ACs_list_name)
-        plot_age_frequencies(ACs_list_name)
-        # find_relevant_ages(ACs_list_name)
+        # plot_age_frequencies(ACs_list_name)
+        find_relevant_ages(ACs_list_name)
         # create_age_wordclouds(ACs_list_name)
 
     return
@@ -2288,10 +2380,18 @@ def stats_art_style(ACs_list_names):
             top_relevance_art_styles = [art_style for art_style, score in sorted_relevance_scores[:4]]
             relevant_art_styles_by_concept[concept] = (top_frequencies_art_styles, top_relevance_art_styles)
 
-        print(relevant_art_styles_by_concept)
         for concept, (freq_art_style_set, rel_art_style_set) in relevant_art_styles_by_concept.items():
             print(concept, "has top frequency art styles:", freq_art_style_set)
             print(concept, "has top relevance art styles:", rel_art_style_set)
+
+
+        file_path = "top_relevant_jsons/top_relevant_art_styles_by_concept.json"
+        # Using json.dump() to write the dictionary to a JSON file
+        with open(file_path, "w") as json_file:
+            top_relevant_art_styles_by_concept = {key: value[1] for key, value in relevant_art_styles_by_concept.items() if value}
+
+            json.dump(top_relevant_art_styles_by_concept, json_file)
+
         return relevant_art_styles_by_concept
 
     def create_art_style_wordclouds(ACs_list_name, threshold=0.5):
@@ -2341,8 +2441,8 @@ def stats_art_style(ACs_list_names):
     concepts_of_interest = ['comfort', 'danger', 'death', 'fitness', 'freedom', 'power', 'safety']
     for ACs_list_name in ACs_list_names:
         # get_art_styles_by_concept(ACs_list_name)
-        plot_art_style_frequencies(ACs_list_name)
-        # find_relevant_art_styles(ACs_list_name)
+        # plot_art_style_frequencies(ACs_list_name)
+        find_relevant_art_styles(ACs_list_name)
         # create_art_style_wordclouds(ACs_list_name)
 
     return
@@ -2440,47 +2540,121 @@ def stats_action(ACs_list_names):
         plt.savefig(save_filename)
         plt.show()
 
-    def find_relevant_actions(ACs_list_name):
-        action_frequencies_by_concept, all_actions_frequencies = calculate_action_frequencies(ACs_list_name)
+    # def find_relevant_actions_normalized(ACs_list_name):
+    #     action_frequencies_by_concept, all_actions_frequencies = calculate_action_frequencies(ACs_list_name)
+    #
+    #     # Calculate the overall action frequencies across all concepts
+    #     all_action_frequencies = Counter()
+    #     for action_frequencies in action_frequencies_by_concept.values():
+    #         all_action_frequencies.update(action_frequencies)
+    #
+    #     relevant_actions_by_concept = {}
+    #
+    #     for concept, action_frequencies in action_frequencies_by_concept.items():
+    #         # Calculate the sum of frequencies for normalization
+    #         sum_of_frequencies = sum(action_frequencies.values())
+    #
+    #         # Calculate relative frequency (TF) for each action within the concept and normalize
+    #         relative_frequencies = {
+    #             action: freq / sum_of_frequencies
+    #             for action, freq in action_frequencies.items()
+    #         }
+    #
+    #         # Calculate inverse concept frequency (IDF) for each action
+    #         num_concepts = len(action_frequencies_by_concept)
+    #         inverse_concept_frequency = {action: num_concepts / sum(
+    #             1 for action_frequencies in action_frequencies_by_concept.values() if action in action_frequencies)
+    #                                      for action in action_frequencies}
+    #
+    #         # Calculate relevance score for each action in the concept (TF * IDF)
+    #         relevance_scores = {action: round(relative_frequencies[action] * inverse_concept_frequency[action], 3)
+    #                             for action in action_frequencies}
+    #
+    #         # Sort actions based on their relevance scores in descending order
+    #         sorted_relevance_scores = sorted(relevance_scores.items(), key=lambda x: x[1], reverse=True)
+    #
+    #         # Keep the top 4 actions based on frequencies and the top 4 relevant actions
+    #         top_frequencies_actions = [action for action, score in
+    #                                    sorted(action_frequencies.items(), key=lambda x: x[1], reverse=True)[:4]]
+    #         top_relevance_actions = [action for action, score in sorted_relevance_scores[:15]]
+    #         relevant_actions_by_concept[concept] = (top_frequencies_actions, top_relevance_actions)
+    #
+    #     # Find actions that appear in at least half of the top action lists
+    #     actions_to_remove = set()
+    #     concept_count = len(relevant_actions_by_concept)
+    #     action_counts = Counter()
+    #     for concept, (_, rel_action_set) in relevant_actions_by_concept.items():
+    #         action_counts.update(rel_action_set)
+    #
+    #     for action, count in action_counts.items():
+    #         if count >= 10:
+    #             actions_to_remove.add(action)
+    #
+    #     # Remove common actions from all concepts
+    #     for concept in relevant_actions_by_concept:
+    #         freq_action_set, rel_action_set = relevant_actions_by_concept[concept]
+    #         relevant_actions_by_concept[concept] = (
+    #             [action for action in freq_action_set if action not in actions_to_remove],
+    #             [action for action in rel_action_set if action not in actions_to_remove]
+    #         )
+    #
+    #     for concept, (freq_action_set, rel_action_set) in relevant_actions_by_concept.items():
+    #         print(concept, "has top frequency actions:", freq_action_set)
+    #         print(concept, "has top relevance actions:", rel_action_set)
+    #
+    #     file_path = "top_relevant_jsons/top_relevant_actions_by_concept.json"
+    #     # Using json.dump() to write the dictionary to a JSON file
+    #     with open(file_path, "w") as json_file:
+    #         top_relevant_actions_by_concept = {key: value[1] for key, value in relevant_actions_by_concept.items() if
+    #                                            value}
+    #         json.dump(top_relevant_actions_by_concept, json_file)
+    #         print(top_relevant_actions_by_concept)
+    #     return relevant_actions_by_concept
 
-        # Calculate the overall action frequencies across all concepts
-        all_action_frequencies = Counter()
-        for action_frequencies in action_frequencies_by_concept.values():
-            all_action_frequencies.update(action_frequencies)
+    def find_top_concepts_for_actions_normalized(ACs_list_name, top_n=3):
+        actions_by_concept, _ = get_actions_by_concept(ACs_list_name)
+        action_concept_scores = defaultdict(dict)
 
-        relevant_actions_by_concept = {}
+        # Calculate concept scores for each action and normalize by concept size
+        concept_sizes = {concept: len(actions_list) for concept, actions_list in actions_by_concept.items()}
 
-        for concept, action_frequencies in action_frequencies_by_concept.items():
-            # Calculate relative frequency (TF) for each action within the concept
-            relative_frequencies = {
-                action: freq / sum(action_frequencies.values())
-                for action, freq in action_frequencies.items()
-            }
+        for concept, actions_list in actions_by_concept.items():
+            for action in actions_list:
+                if action not in action_concept_scores:
+                    action_concept_scores[action] = {}
+                if concept in action_concept_scores[action]:
+                    action_concept_scores[action][concept] += 1 / concept_sizes[concept]
+                else:
+                    action_concept_scores[action][concept] = 1 / concept_sizes[concept]
 
-            # Calculate inverse concept frequency (IDF) for each action
-            num_concepts = len(action_frequencies_by_concept)
-            inverse_concept_frequency = {action: num_concepts / sum(
-                1 for action_frequencies in action_frequencies_by_concept.values() if action in action_frequencies)
-                                         for action in action_frequencies}
+        top_concepts_for_actions = {}
 
-            # Calculate relevance score for each action in the concept (TF * IDF)
-            relevance_scores = {action: round(relative_frequencies[action] * inverse_concept_frequency[action], 3)
-                                for action in action_frequencies}
+        # Find the top N concepts for each action
+        for action, concept_scores in action_concept_scores.items():
+            sorted_concepts = sorted(concept_scores.items(), key=lambda x: x[1], reverse=True)
+            top_concepts = [concept for concept, _ in sorted_concepts[:top_n]]
+            top_concepts_for_actions[action] = top_concepts
 
-            # Sort actions based on their relevance scores in descending order
-            sorted_relevance_scores = sorted(relevance_scores.items(), key=lambda x: x[1], reverse=True)
 
-            # Keep the top 4 actions based on frequencies and the top 4 relevant actions
-            top_frequencies_actions = [action for action, score in
-                                       sorted(action_frequencies.items(), key=lambda x: x[1], reverse=True)[:4]]
-            top_relevance_actions = [action for action, score in sorted_relevance_scores[:4]]
-            relevant_actions_by_concept[concept] = (top_frequencies_actions, top_relevance_actions)
+        result_dict = {concept: [] for concept in
+                       set(action for actions in top_concepts_for_actions.values() for action in actions)}
 
-        print(relevant_actions_by_concept)
-        for concept, (freq_action_set, rel_action_set) in relevant_actions_by_concept.items():
-            print(concept, "has top frequency actions:", freq_action_set)
-            print(concept, "has top relevance actions:", rel_action_set)
-        return relevant_actions_by_concept
+        # Populate the result dictionary
+        for action, concepts in top_concepts_for_actions.items():
+            for concept in concepts:
+                result_dict[concept].append(action)
+
+        # Sort the actions for each concept alphabetically
+        for concept, actions in result_dict.items():
+            result_dict[concept] = sorted(actions)
+
+        file_path = "top_relevant_jsons/top_relevant_actions_by_concept.json"
+        # Using json.dump() to write the dictionary to a JSON file
+        with open(file_path, "w") as json_file:
+            json.dump(result_dict, json_file)
+        print(result_dict)
+
+        return result_dict
 
     def create_action_wordclouds(ACs_list_name, threshold=0.9):
         actions_by_concept, actions_by_concept_w_strengths = get_actions_by_concept(ACs_list_name)
@@ -2530,8 +2704,9 @@ def stats_action(ACs_list_names):
     for ACs_list_name in ACs_list_names:
         # get_action_frequencies(ACs_list_name)
         # plot_action_frequencies(ACs_list_name)
-        # find_relevant_actions(ACs_list_name)
-        create_action_wordclouds(ACs_list_name)
+        # find_relevant_actions_normalized(ACs_list_name)
+        find_top_concepts_for_actions_normalized(ACs_list_name)
+        # create_action_wordclouds(ACs_list_name)
     return
 
 ## Human Presence
@@ -2613,8 +2788,8 @@ def stats_hp(ACs_list_names):
     return
 
 # Execution input examples
-ACs_list_names = ["ARTstract_ACs_lists", "Balanced_ARTstract_ACs_lists"]
-# ACs_list_names = ["Balanced_ARTstract_ACs_lists"]
+# ACs_list_names = ["ARTstract_ACs_lists", "Balanced_ARTstract_ACs_lists"]
+ACs_list_names = ["ARTstract_ACs_lists"]
 dataset_colors = ['#00BFFF', '#FF6F61', '#9370DB', '#2E8B57']
 concept_colors = ['#1f77b4', '#ff7f0e', '#2ca02c', '#d62728', '#9467bd', '#8c564b', '#e377c2']
 plot_type = "bar"
@@ -2651,7 +2826,7 @@ plot_type = "bar"
 # stats_art_style(ACs_list_names)
 
 ### Actions
-# stats_action(ACs_list_names)
+stats_action(ACs_list_names)
 
 ## Human Presence
 # stats_hp(ACs_list_names)
