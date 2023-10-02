@@ -1,7 +1,7 @@
 import json
 
 # Load your JSON data
-with open('merged_ARTstract.json', 'r') as json_file:
+with open('merged_test_data.json', 'r') as json_file:
     data = json.load(json_file)
 
 # Function to round annotation strength to two decimal places
@@ -66,7 +66,7 @@ for image_id, image_data in data.items():
     image_descriptions[image_id]["description_w_strength"] = description_with_strength
 
 # Write the dictionary to a JSON file
-with open('image_descriptions.json', 'w') as output_file:
+with open('test_image_descriptions.json', 'w') as output_file:
     json.dump(image_descriptions, output_file, indent=4)
 
 print("Image descriptions saved to 'image_descriptions.json'.")
