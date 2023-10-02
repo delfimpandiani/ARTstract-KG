@@ -1,0 +1,912 @@
+{
+    "hk_triumph_2": {
+        "source_dataset": "test",
+        "age": {
+            "ARTstract_age_2023_06_26": {
+                "age_tier": "20-29",
+                "conceptnet_concept": "conceptnet:twenties",
+                "annotation_strength": 0.38224753737449646
+            }
+        },
+        "color": {
+            "ARTstract_color_2023_06_26": [
+                {
+                    "rgb": [
+                        168,
+                        140,
+                        111
+                    ],
+                    "webcolor_name": "rosybrown",
+                    "conceptnet_concept": "conceptnet:brown"
+                },
+                {
+                    "rgb": [
+                        116,
+                        90,
+                        61
+                    ],
+                    "webcolor_name": "darkolivegreen",
+                    "conceptnet_concept": "conceptnet:olive_green"
+                },
+                {
+                    "rgb": [
+                        140,
+                        132,
+                        128
+                    ],
+                    "webcolor_name": "gray",
+                    "conceptnet_concept": "conceptnet:gray"
+                },
+                {
+                    "rgb": [
+                        132,
+                        124,
+                        124
+                    ],
+                    "webcolor_name": "gray",
+                    "conceptnet_concept": "conceptnet:gray"
+                }
+            ]
+        },
+        "em": {
+            "ARTstract_em_2023_06_26": {
+                "emotion": "fear",
+                "conceptnet_concept": "conceptnet:fear",
+                "annotation_strength": 0.3475285470485687
+            }
+        },
+        "act": {
+            "ARTstract_act_2023_06_28": {
+                "action_label": "dancing",
+                "conceptnet_concept": "conceptnet:dancing",
+                "annotation_strength": 0.9177259206771851
+            }
+        },
+        "hp": {
+            "ARTstract_hp_2023_06_26": {
+                "human_presence": "True",
+                "lexical_presence": "Human depicted",
+                "conceptnet_concept": "conceptnet:human",
+                "annotation_strength": 0.9851446610096107
+            }
+        },
+        "ic": {
+            "ARTstract_ic_2023_06_28": {
+                "image_description": "painting of a group of people holding flags and standing on a hill"
+            }
+        },
+        "od": {
+            "ARTstract_od_2023_06_28": {
+                "detected_objects": [
+                    {
+                        "detected_object": "person",
+                        "coordinates": {
+                            "x1": 176.87,
+                            "y1": 53.67,
+                            "x2": 210.75,
+                            "y2": 142.29
+                        },
+                        "annotation_strength": 0.99
+                    },
+                    {
+                        "detected_object": "sports ball",
+                        "coordinates": {
+                            "x1": 112.1,
+                            "y1": 97.81,
+                            "x2": 132.03,
+                            "y2": 115.02
+                        },
+                        "annotation_strength": 0.942
+                    },
+                    {
+                        "detected_object": "person",
+                        "coordinates": {
+                            "x1": 37.81,
+                            "y1": 75.2,
+                            "x2": 65.67,
+                            "y2": 133.02
+                        },
+                        "annotation_strength": 0.919
+                    },
+                    {
+                        "detected_object": "person",
+                        "coordinates": {
+                            "x1": 103.16,
+                            "y1": 97.49,
+                            "x2": 134.7,
+                            "y2": 150.19
+                        },
+                        "annotation_strength": 0.872
+                    },
+                    {
+                        "detected_object": "person",
+                        "coordinates": {
+                            "x1": 237.27,
+                            "y1": 87.67,
+                            "x2": 262.22,
+                            "y2": 128.96
+                        },
+                        "annotation_strength": 0.878
+                    },
+                    {
+                        "detected_object": "person",
+                        "coordinates": {
+                            "x1": 139.58,
+                            "y1": 11.74,
+                            "x2": 177.8,
+                            "y2": 119.76
+                        },
+                        "annotation_strength": 0.884
+                    },
+                    {
+                        "detected_object": "person",
+                        "coordinates": {
+                            "x1": 94.04,
+                            "y1": 71.18,
+                            "x2": 116.97,
+                            "y2": 119.34
+                        },
+                        "annotation_strength": 0.734
+                    },
+                    {
+                        "detected_object": "person",
+                        "coordinates": {
+                            "x1": 46.37,
+                            "y1": 121.97,
+                            "x2": 98.62,
+                            "y2": 182.69
+                        },
+                        "annotation_strength": 0.752
+                    },
+                    {
+                        "detected_object": "person",
+                        "coordinates": {
+                            "x1": 65.5,
+                            "y1": 121.24,
+                            "x2": 98.36,
+                            "y2": 147.41
+                        },
+                        "annotation_strength": 0.823
+                    },
+                    {
+                        "detected_object": "person",
+                        "coordinates": {
+                            "x1": 116.32,
+                            "y1": 51.61,
+                            "x2": 144.32,
+                            "y2": 144.49
+                        },
+                        "annotation_strength": 0.825
+                    },
+                    {
+                        "detected_object": "person",
+                        "coordinates": {
+                            "x1": 135.29,
+                            "y1": -0.09,
+                            "x2": 177.56,
+                            "y2": 146.35
+                        },
+                        "annotation_strength": 0.902
+                    },
+                    {
+                        "detected_object": "person",
+                        "coordinates": {
+                            "x1": 221.54,
+                            "y1": 71.78,
+                            "x2": 242.83,
+                            "y2": 99.13
+                        },
+                        "annotation_strength": 0.978
+                    },
+                    {
+                        "detected_object": "person",
+                        "coordinates": {
+                            "x1": 119.97,
+                            "y1": 51.46,
+                            "x2": 142.63,
+                            "y2": 100.55
+                        },
+                        "annotation_strength": 0.926
+                    },
+                    {
+                        "detected_object": "baseball glove",
+                        "coordinates": {
+                            "x1": 96.14,
+                            "y1": 71.79,
+                            "x2": 114.47,
+                            "y2": 91.15
+                        },
+                        "annotation_strength": 0.775
+                    }
+                ]
+            }
+        },
+        "as": {
+            "ARTstract_as_2023_06_26": {
+                "art_style": "Surrealism",
+                "conceptnet_concept": "conceptnet:surrealism",
+                "annotation_strength": 0.8548154830932617
+            }
+        }
+    },
+    "delacroix": {
+              "source_dataset": "test",
+        "age": {
+            "ARTstract_age_2023_06_26": {
+                "age_tier": "20-29",
+                "conceptnet_concept": "conceptnet:twenties",
+                "annotation_strength": 0.4397295117378235
+            }
+        },
+        "color": {
+            "ARTstract_color_2023_06_26": [
+                {
+                    "rgb": [
+                        96,
+                        87,
+                        82
+                    ],
+                    "webcolor_name": "dimgray",
+                    "conceptnet_concept": "conceptnet:gray"
+                },
+                {
+                    "rgb": [
+                        201,
+                        215,
+                        223
+                    ],
+                    "webcolor_name": "lightgray",
+                    "conceptnet_concept": "conceptnet:light_gray"
+                },
+                {
+                    "rgb": [
+                        212,
+                        163,
+                        138
+                    ],
+                    "webcolor_name": "tan",
+                    "conceptnet_concept": "conceptnet:tan"
+                },
+                {
+                    "rgb": [
+                        127,
+                        151,
+                        166
+                    ],
+                    "webcolor_name": "lightslategray",
+                    "conceptnet_concept": "conceptnet:slate_gray"
+                },
+                {
+                    "rgb": [
+                        173,
+                        182,
+                        179
+                    ],
+                    "webcolor_name": "darkgray",
+                    "conceptnet_concept": "conceptnet:dark_gray"
+                }
+            ]
+        },
+        "em": {
+            "ARTstract_em_2023_06_26": {
+                "emotion": "fear",
+                "conceptnet_concept": "conceptnet:fear",
+                "annotation_strength": 0.20977826416492462
+            }
+        },
+        "act": {
+            "ARTstract_act_2023_06_28": {
+                "action_label": "dancing",
+                "conceptnet_concept": "conceptnet:dancing",
+                "annotation_strength": 0.9963849782943726
+            }
+        },
+        "hp": {
+            "ARTstract_hp_2023_06_26": {
+                "human_presence": "True",
+                "lexical_presence": "Human depicted",
+                "conceptnet_concept": "conceptnet:human",
+                "annotation_strength": 0.9834424867186242
+            }
+        },
+        "ic": {
+            "ARTstract_ic_2023_06_28": {
+                "image_description": "painting of a woman holding a flag on top of a hill"
+            }
+        },
+        "od": {
+            "ARTstract_od_2023_06_28": {
+                "detected_objects": [
+                    {
+                        "detected_object": "person",
+                        "coordinates": {
+                            "x1": 245.69,
+                            "y1": 86.83,
+                            "x2": 307.41,
+                            "y2": 240.16
+                        },
+                        "annotation_strength": 0.996
+                    },
+                    {
+                        "detected_object": "person",
+                        "coordinates": {
+                            "x1": 143.17,
+                            "y1": 118.68,
+                            "x2": 160.84,
+                            "y2": 157.42
+                        },
+                        "annotation_strength": 0.946
+                    },
+                    {
+                        "detected_object": "person",
+                        "coordinates": {
+                            "x1": 93.83,
+                            "y1": 149.08,
+                            "x2": 218.69,
+                            "y2": 253.28
+                        },
+                        "annotation_strength": 0.998
+                    },
+                    {
+                        "detected_object": "person",
+                        "coordinates": {
+                            "x1": 15.19,
+                            "y1": 218.87,
+                            "x2": 201.29,
+                            "y2": 310.06
+                        },
+                        "annotation_strength": 0.96
+                    },
+                    {
+                        "detected_object": "person",
+                        "coordinates": {
+                            "x1": 148.53,
+                            "y1": 239.83,
+                            "x2": 377.64,
+                            "y2": 309.63
+                        },
+                        "annotation_strength": 0.883
+                    },
+                    {
+                        "detected_object": "person",
+                        "coordinates": {
+                            "x1": 134.66,
+                            "y1": 99.31,
+                            "x2": 160.92,
+                            "y2": 157.14
+                        },
+                        "annotation_strength": 0.912
+                    },
+                    {
+                        "detected_object": "person",
+                        "coordinates": {
+                            "x1": 147.55,
+                            "y1": 241.15,
+                            "x2": 333.65,
+                            "y2": 308.79
+                        },
+                        "annotation_strength": 0.793
+                    },
+                    {
+                        "detected_object": "person",
+                        "coordinates": {
+                            "x1": 70.02,
+                            "y1": 110.86,
+                            "x2": 86.04,
+                            "y2": 130.49
+                        },
+                        "annotation_strength": 0.956
+                    },
+                    {
+                        "detected_object": "person",
+                        "coordinates": {
+                            "x1": 176.62,
+                            "y1": 22.15,
+                            "x2": 254.13,
+                            "y2": 224.07
+                        },
+                        "annotation_strength": 0.998
+                    },
+                    {
+                        "detected_object": "person",
+                        "coordinates": {
+                            "x1": 70.62,
+                            "y1": 89.52,
+                            "x2": 146.77,
+                            "y2": 236.36
+                        },
+                        "annotation_strength": 0.996
+                    },
+                    {
+                        "detected_object": "person",
+                        "coordinates": {
+                            "x1": 1.42,
+                            "y1": 169.81,
+                            "x2": 55.37,
+                            "y2": 232.14
+                        },
+                        "annotation_strength": 0.965
+                    },
+                    {
+                        "detected_object": "person",
+                        "coordinates": {
+                            "x1": 154.43,
+                            "y1": 120.54,
+                            "x2": 179.16,
+                            "y2": 153.52
+                        },
+                        "annotation_strength": 0.923
+                    },
+                    {
+                        "detected_object": "tie",
+                        "coordinates": {
+                            "x1": 274.71,
+                            "y1": 136.66,
+                            "x2": 284.42,
+                            "y2": 182.63
+                        },
+                        "annotation_strength": 0.71
+                    },
+                    {
+                        "detected_object": "person",
+                        "coordinates": {
+                            "x1": 124.39,
+                            "y1": 119.33,
+                            "x2": 135.52,
+                            "y2": 135.62
+                        },
+                        "annotation_strength": 0.784
+                    },
+                    {
+                        "detected_object": "person",
+                        "coordinates": {
+                            "x1": 15.26,
+                            "y1": 95.32,
+                            "x2": 83.13,
+                            "y2": 204.34
+                        },
+                        "annotation_strength": 0.984
+                    },
+                    {
+                        "detected_object": "person",
+                        "coordinates": {
+                            "x1": 32.83,
+                            "y1": 215.39,
+                            "x2": 109.99,
+                            "y2": 255.38
+                        },
+                        "annotation_strength": 0.76
+                    }
+                ]
+            }
+        },
+        "as": {
+            "ARTstract_as_2023_06_26": {
+                "art_style": "Surrealism",
+                "conceptnet_concept": "conceptnet:surrealism",
+                "annotation_strength": 0.4652227461338043
+            }
+        }
+    },
+    "hk_triumph": {
+              "source_dataset": "test",
+
+        "age": {
+            "ARTstract_age_2023_06_26": {
+                "age_tier": "20-29",
+                "conceptnet_concept": "conceptnet:twenties",
+                "annotation_strength": 0.30165788531303406
+            }
+        },
+        "color": {
+            "ARTstract_color_2023_06_26": [
+                {
+                    "rgb": [
+                        189,
+                        166,
+                        137
+                    ],
+                    "webcolor_name": "rosybrown",
+                    "conceptnet_concept": "conceptnet:brown"
+                },
+                {
+                    "rgb": [
+                        123,
+                        104,
+                        85
+                    ],
+                    "webcolor_name": "dimgray",
+                    "conceptnet_concept": "conceptnet:gray"
+                },
+                {
+                    "rgb": [
+                        144,
+                        149,
+                        131
+                    ],
+                    "webcolor_name": "gray",
+                    "conceptnet_concept": "conceptnet:gray"
+                },
+                {
+                    "rgb": [
+                        133,
+                        134,
+                        148
+                    ],
+                    "webcolor_name": "lightslategray",
+                    "conceptnet_concept": "conceptnet:slate_gray"
+                }
+            ]
+        },
+        "em": {
+            "ARTstract_em_2023_06_26": {
+                "emotion": "fear",
+                "conceptnet_concept": "conceptnet:fear",
+                "annotation_strength": 0.2210244983434677
+            }
+        },
+        "act": {
+            "ARTstract_act_2023_06_28": {
+                "action_label": "dancing",
+                "conceptnet_concept": "conceptnet:dancing",
+                "annotation_strength": 0.9961155652999878
+            }
+        },
+        "hp": {
+            "ARTstract_hp_2023_06_26": {
+                "human_presence": "True",
+                "lexical_presence": "Human depicted",
+                "conceptnet_concept": "conceptnet:human",
+                "annotation_strength": 0.9000148413592264
+            }
+        },
+        "ic": {
+            "ARTstract_ic_2023_06_28": {
+                "image_description": "painting of a woman holding a child in a crowded area"
+            }
+        },
+        "od": {
+            "ARTstract_od_2023_06_28": {
+                "detected_objects": [
+                    {
+                        "detected_object": "person",
+                        "coordinates": {
+                            "x1": 214.17,
+                            "y1": 565.92,
+                            "x2": 558.45,
+                            "y2": 899.07
+                        },
+                        "annotation_strength": 0.969
+                    },
+                    {
+                        "detected_object": "person",
+                        "coordinates": {
+                            "x1": 446.03,
+                            "y1": 178.47,
+                            "x2": 717.17,
+                            "y2": 804.44
+                        },
+                        "annotation_strength": 0.994
+                    },
+                    {
+                        "detected_object": "handbag",
+                        "coordinates": {
+                            "x1": 0.06,
+                            "y1": 500.1,
+                            "x2": 107.03,
+                            "y2": 705.67
+                        },
+                        "annotation_strength": 0.928
+                    },
+                    {
+                        "detected_object": "person",
+                        "coordinates": {
+                            "x1": 679.84,
+                            "y1": 366.33,
+                            "x2": 886.78,
+                            "y2": 856.64
+                        },
+                        "annotation_strength": 0.995
+                    },
+                    {
+                        "detected_object": "person",
+                        "coordinates": {
+                            "x1": 0.14,
+                            "y1": 397.51,
+                            "x2": 132.73,
+                            "y2": 765.4
+                        },
+                        "annotation_strength": 0.927
+                    },
+                    {
+                        "detected_object": "person",
+                        "coordinates": {
+                            "x1": 434.98,
+                            "y1": 141.46,
+                            "x2": 621.77,
+                            "y2": 582.57
+                        },
+                        "annotation_strength": 0.913
+                    },
+                    {
+                        "detected_object": "backpack",
+                        "coordinates": {
+                            "x1": 0.17,
+                            "y1": 493.08,
+                            "x2": 108.56,
+                            "y2": 714.06
+                        },
+                        "annotation_strength": 0.798
+                    },
+                    {
+                        "detected_object": "person",
+                        "coordinates": {
+                            "x1": 101.56,
+                            "y1": 382.39,
+                            "x2": 346.37,
+                            "y2": 855.62
+                        },
+                        "annotation_strength": 0.992
+                    }
+                ]
+            }
+        },
+        "as": {
+            "ARTstract_as_2023_06_26": {
+                "art_style": "Romanticism",
+                "conceptnet_concept": "conceptnet:romanticism",
+                "annotation_strength": 0.3455085754394531
+            }
+        }
+    },
+    "triumph": {
+              "source_dataset": "test",
+
+        "age": {
+            "ARTstract_age_2023_06_26": {
+                "age_tier": "30-39",
+                "conceptnet_concept": "conceptnet:thirties",
+                "annotation_strength": 0.304028183221817
+            }
+        },
+        "color": {
+            "ARTstract_color_2023_06_26": [
+                {
+                    "rgb": [
+                        64,
+                        58,
+                        49
+                    ],
+                    "webcolor_name": "darkslategray",
+                    "conceptnet_concept": "conceptnet:slate_gray"
+                },
+                {
+                    "rgb": [
+                        177,
+                        146,
+                        114
+                    ],
+                    "webcolor_name": "rosybrown",
+                    "conceptnet_concept": "conceptnet:brown"
+                },
+                {
+                    "rgb": [
+                        132,
+                        106,
+                        82
+                    ],
+                    "webcolor_name": "dimgray",
+                    "conceptnet_concept": "conceptnet:gray"
+                },
+                {
+                    "rgb": [
+                        107,
+                        129,
+                        140
+                    ],
+                    "webcolor_name": "slategray",
+                    "conceptnet_concept": "conceptnet:slate_gray"
+                },
+                {
+                    "rgb": [
+                        147,
+                        151,
+                        137
+                    ],
+                    "webcolor_name": "gray",
+                    "conceptnet_concept": "conceptnet:gray"
+                }
+            ]
+        },
+        "em": {
+            "ARTstract_em_2023_06_26": {
+                "emotion": "awe",
+                "conceptnet_concept": "conceptnet:awe",
+                "annotation_strength": 0.3177589774131775
+            }
+        },
+        "act": {
+            "ARTstract_act_2023_06_28": {
+                "action_label": "sleeping",
+                "conceptnet_concept": "conceptnet:sleeping",
+                "annotation_strength": 0.9417657256126404
+            }
+        },
+        "hp": {
+            "ARTstract_hp_2023_06_26": {
+                "human_presence": "True",
+                "lexical_presence": "Human depicted",
+                "conceptnet_concept": "conceptnet:human",
+                "annotation_strength": 0.975568766305973
+            }
+        },
+        "ic": {
+            "ARTstract_ic_2023_06_28": {
+                "image_description": "painting of a group of people in a room with a painting of a woman"
+            }
+        },
+        "od": {
+            "ARTstract_od_2023_06_28": {
+                "detected_objects": [
+                    {
+                        "detected_object": "handbag",
+                        "coordinates": {
+                            "x1": 1037.47,
+                            "y1": 996.96,
+                            "x2": 1375.06,
+                            "y2": 1315.72
+                        },
+                        "annotation_strength": 0.832
+                    },
+                    {
+                        "detected_object": "person",
+                        "coordinates": {
+                            "x1": 2154.87,
+                            "y1": 892.62,
+                            "x2": 2810.69,
+                            "y2": 2255.52
+                        },
+                        "annotation_strength": 0.99
+                    },
+                    {
+                        "detected_object": "person",
+                        "coordinates": {
+                            "x1": 1104.18,
+                            "y1": 577.25,
+                            "x2": 1841.91,
+                            "y2": 1709.17
+                        },
+                        "annotation_strength": 0.945
+                    },
+                    {
+                        "detected_object": "person",
+                        "coordinates": {
+                            "x1": 900.32,
+                            "y1": 1777.12,
+                            "x2": 2065.18,
+                            "y2": 2675.67
+                        },
+                        "annotation_strength": 0.961
+                    },
+                    {
+                        "detected_object": "person",
+                        "coordinates": {
+                            "x1": 2705.02,
+                            "y1": 916.14,
+                            "x2": 3015.66,
+                            "y2": 1418.88
+                        },
+                        "annotation_strength": 0.801
+                    },
+                    {
+                        "detected_object": "person",
+                        "coordinates": {
+                            "x1": 2627.96,
+                            "y1": 904.98,
+                            "x2": 3138.27,
+                            "y2": 2334.5
+                        },
+                        "annotation_strength": 0.84
+                    },
+                    {
+                        "detected_object": "person",
+                        "coordinates": {
+                            "x1": 1600.12,
+                            "y1": 696.04,
+                            "x2": 2315.66,
+                            "y2": 1778.77
+                        },
+                        "annotation_strength": 0.997
+                    },
+                    {
+                        "detected_object": "person",
+                        "coordinates": {
+                            "x1": 1352.08,
+                            "y1": 1453.38,
+                            "x2": 1594.53,
+                            "y2": 1837.6
+                        },
+                        "annotation_strength": 0.888
+                    },
+                    {
+                        "detected_object": "dog",
+                        "coordinates": {
+                            "x1": 2169.79,
+                            "y1": 2199.04,
+                            "x2": 2828.88,
+                            "y2": 2617.89
+                        },
+                        "annotation_strength": 0.958
+                    },
+                    {
+                        "detected_object": "person",
+                        "coordinates": {
+                            "x1": 1117.98,
+                            "y1": 580.11,
+                            "x2": 1850.51,
+                            "y2": 1249.5
+                        },
+                        "annotation_strength": 0.757
+                    },
+                    {
+                        "detected_object": "person",
+                        "coordinates": {
+                            "x1": 1626.58,
+                            "y1": 1628.24,
+                            "x2": 2581.31,
+                            "y2": 2583.71
+                        },
+                        "annotation_strength": 0.996
+                    },
+                    {
+                        "detected_object": "person",
+                        "coordinates": {
+                            "x1": 2441.47,
+                            "y1": 95.92,
+                            "x2": 3411.91,
+                            "y2": 850.12
+                        },
+                        "annotation_strength": 0.995
+                    },
+                    {
+                        "detected_object": "person",
+                        "coordinates": {
+                            "x1": 2649.65,
+                            "y1": 899.31,
+                            "x2": 3564.13,
+                            "y2": 2857.49
+                        },
+                        "annotation_strength": 0.992
+                    },
+                    {
+                        "detected_object": "person",
+                        "coordinates": {
+                            "x1": 651.65,
+                            "y1": 653.46,
+                            "x2": 1413.81,
+                            "y2": 1901.82
+                        },
+                        "annotation_strength": 0.977
+                    },
+                    {
+                        "detected_object": "person",
+                        "coordinates": {
+                            "x1": 96.24,
+                            "y1": 467.97,
+                            "x2": 759.27,
+                            "y2": 2260.89
+                        },
+                        "annotation_strength": 0.98
+                    }
+                ]
+            }
+        },
+        "as": {
+            "ARTstract_as_2023_06_26": {
+                "art_style": "Renaissance",
+                "conceptnet_concept": "conceptnet:renaissance",
+                "annotation_strength": 0.8138816952705383
+            }
+        }
+    }
+}
