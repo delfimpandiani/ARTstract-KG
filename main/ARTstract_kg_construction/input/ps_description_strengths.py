@@ -13,7 +13,6 @@ def round_annotation_strength(annotation_strength):
 
 # Function to generate the description
 def generate_description_with_strength(image_data):
-    source_dataset = image_data['source_dataset']
 
     art_style_data = image_data['as']['ARTstract_as_2023_06_26']
     art_style = art_style_data['art_style']
@@ -48,8 +47,8 @@ def generate_description_with_strength(image_data):
     caption_data = image_data['ic']['ARTstract_ic_2023_06_28']
     caption = caption_data['image_description']
 
-    description = f"This image comes from {source_dataset}, shows a {art_style} art style, evokes {emotion} emotion, depicts {action} as main action, the top five colors are: {color_text}, and the following objects were detected: {object_text}. It has a human presence: {human_presence}. It was automatically captioned as: '{caption}'. Depicts the following age tier: {age_tier}.)."
-    description_with_strength = f"This image comes from {source_dataset}, shows a {art_style} art style (Strength: {art_style_strength}), evokes {emotion} emotion (Strength: {emotion_strength}), depicts {action} (Strength: {action_strength}), the top five colors are: {color_text}, and the following objects were detected: {object_text}. It has a human presence: {human_presence} (Strength: {human_presence_strength}).  It was automatically captioned as: '{caption}'. Depicts the following age tier: {age_tier} (Strength: {age_strength})."
+    description = f"This image  shows a {art_style} art style, evokes {emotion} emotion, depicts {action} as main action, the top five colors are: {color_text}, and the following objects were detected: {object_text}. It has a human presence: {human_presence}. It was automatically captioned as: '{caption}'. Depicts the following age tier: {age_tier}.)."
+    description_with_strength = f"This image shows a {art_style} art style (Strength: {art_style_strength}), evokes {emotion} emotion (Strength: {emotion_strength}), depicts {action} (Strength: {action_strength}), the top five colors are: {color_text}, and the following objects were detected: {object_text}. It has a human presence: {human_presence} (Strength: {human_presence_strength}).  It was automatically captioned as: '{caption}'. Depicts the following age tier: {age_tier} (Strength: {age_strength})."
 
     return caption, description, description_with_strength
 

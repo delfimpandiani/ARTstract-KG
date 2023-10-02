@@ -2,9 +2,18 @@
   "hk_triumph_2": {
     "as": {
       "ARTstract_as_2023_06_26": {
-        "art_style": "Surrealism",
-        "conceptnet_concept": "conceptnet:surrealism",
-        "annotation_strength": 0.8548154830932617
+        "art_style": "Expressionism",
+        "conceptnet_concept": "conceptnet:expressionism",
+        "annotation_strength": 0.29308536648750305
+      }
+    }
+  },
+  "danger_3": {
+    "as": {
+      "ARTstract_as_2023_06_26": {
+        "art_style": "Post-Impressionism",
+        "conceptnet_concept": "conceptnet:post_impressionism",
+        "annotation_strength": 0.4575680196285248
       }
     }
   },
@@ -20,9 +29,18 @@
   "hk_triumph": {
     "as": {
       "ARTstract_as_2023_06_26": {
-        "art_style": "Romanticism",
-        "conceptnet_concept": "conceptnet:romanticism",
-        "annotation_strength": 0.3455085754394531
+        "art_style": "Art Nouveau",
+        "conceptnet_concept": "conceptnet:art_nouveau",
+        "annotation_strength": 0.38744524121284485
+      }
+    }
+  },
+  "danger_1": {
+    "as": {
+      "ARTstract_as_2023_06_26": {
+        "art_style": "Art Nouveau",
+        "conceptnet_concept": "conceptnet:art_nouveau",
+        "annotation_strength": 0.4029499888420105
       }
     }
   },
@@ -31,7 +49,16 @@
       "ARTstract_as_2023_06_26": {
         "art_style": "Renaissance",
         "conceptnet_concept": "conceptnet:renaissance",
-        "annotation_strength": 0.8138816952705383
+        "annotation_strength": 0.7142059206962585
+      }
+    }
+  },
+  "danger_2": {
+    "as": {
+      "ARTstract_as_2023_06_26": {
+        "art_style": "Renaissance",
+        "conceptnet_concept": "conceptnet:renaissance",
+        "annotation_strength": 0.856843888759613
       }
     }
   }
