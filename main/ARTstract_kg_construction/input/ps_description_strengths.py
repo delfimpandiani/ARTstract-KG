@@ -51,7 +51,7 @@ def generate_description_with_strength(image_data):
     description = f"This image comes from {source_dataset}, shows a {art_style} art style, evokes {emotion} emotion, depicts {action} as main action, the top five colors are: {color_text}, and the following objects were detected: {object_text}. It has a human presence: {human_presence}. It was automatically captioned as: '{caption}'. Depicts the following age tier: {age_tier}.)."
     description_with_strength = f"This image comes from {source_dataset}, shows a {art_style} art style (Strength: {art_style_strength}), evokes {emotion} emotion (Strength: {emotion_strength}), depicts {action} (Strength: {action_strength}), the top five colors are: {color_text}, and the following objects were detected: {object_text}. It has a human presence: {human_presence} (Strength: {human_presence_strength}).  It was automatically captioned as: '{caption}'. Depicts the following age tier: {age_tier} (Strength: {age_strength})."
 
-    return description, description_with_strength
+    return caption, description, description_with_strength
 
 
 # Create a dictionary to store descriptions
@@ -59,8 +59,9 @@ image_descriptions = {}
 
 # Loop through each image data
 for image_id, image_data in data.items():
-    description, description_with_strength = generate_description_with_strength(image_data)
+    caption, description, description_with_strength = generate_description_with_strength(image_data)
     image_descriptions[image_id] = {}
+    image_descriptions[image_id]["caption"] = caption
     image_descriptions[image_id]["description"] = description
     image_descriptions[image_id]["description_w_strength"] = description_with_strength
 
