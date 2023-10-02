@@ -1,6 +1,5 @@
 import json
-from detectors import act_detector, hp_detector, as_detector, od_detector, age_detector, em_detector, ic_detector, \
-    color_detector
+from detectors import act_detector, hp_detector, as_detector, od_detector, age_detector, em_detector, ic_detector, color_detector
 
 def call_process_folder(detection_type, annotation_situation, folder_path, output_file):
     if detection_type == "act":
@@ -39,10 +38,13 @@ with open('input/annotation_situations.json', 'r') as file:
 
 for annotation_key, annotation_situation in annotation_situations.items():
     detection_type = annotation_situation["annotation_type"]
-    # folder_path = '../__prova/test'
+    folder_path = '../__prova/explain_test'
     # output_file = f'test/{annotation_situation["annotation_type"]}_output.json'
     # output_short_file = f'../{annotation_situation["annotation_type"]}_output_short.json'
     # call_process_folder(detection_type, annotation_situation, folder_path, output_file)
+    output_file = f'test/explain_test/{annotation_situation["annotation_type"]}_output.json'
+    # output_short_file = f'../{annotation_situation["annotation_type"]}_output_short.json'
+    call_process_folder(detection_type, annotation_situation, folder_path, output_file)
 
     detect_for_all_classes(annotation_situation)
 
