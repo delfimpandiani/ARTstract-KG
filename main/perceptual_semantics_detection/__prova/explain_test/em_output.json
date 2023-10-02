@@ -1,0 +1,38 @@
+{
+  "hk_triumph_2": {
+    "em": {
+      "ARTstract_em_2023_06_26": {
+        "emotion": "fear",
+        "conceptnet_concept": "conceptnet:fear",
+        "annotation_strength": 0.3475285470485687
+      }
+    }
+  },
+  "delacroix": {
+    "em": {
+      "ARTstract_em_2023_06_26": {
+        "emotion": "fear",
+        "conceptnet_concept": "conceptnet:fear",
+        "annotation_strength": 0.20977826416492462
+      }
+    }
+  },
+  "hk_triumph": {
+    "em": {
+      "ARTstract_em_2023_06_26": {
+        "emotion": "fear",
+        "conceptnet_concept": "conceptnet:fear",
+        "annotation_strength": 0.2210244983434677
+      }
+    }
+  },
+  "triumph": {
+    "em": {
+      "ARTstract_em_2023_06_26": {
+        "emotion": "awe",
+        "conceptnet_concept": "conceptnet:awe",
+        "annotation_strength": 0.3177589774131775
+      }
+    }
+  }
+}

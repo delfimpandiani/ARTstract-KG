@@ -206,6 +206,7 @@ def process_folder(annotation_situation, folder_path, output_file):
             image_path = os.path.join(folder_path, filename)
             image_id = os.path.splitext(filename)[0]
             image = Image.open(image_path)
+            image = image.convert("RGB")
             image, object_details = detect_objects(image, annotator)
 
 

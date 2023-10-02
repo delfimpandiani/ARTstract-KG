@@ -110,6 +110,7 @@ def process_folder(annotation_situation, folder_path, output_file):
             image_path = os.path.join(folder_path, filename)
             image_id = os.path.splitext(filename)[0]
             image = Image.open(image_path)
+            image = image.convert("RGB")
             art_style_name, class_probs = detect_style(image)
             conceptnet_concept = get_conceptnet_concept(art_style_name)
 

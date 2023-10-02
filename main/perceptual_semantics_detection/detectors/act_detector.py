@@ -52,6 +52,7 @@ def process_folder(annotation_situation, folder_path, output_file):
     def get_image_action(image_path, annotation_situation):
         annotator = annotation_situation["annotator"]
         image = Image.open(image_path)
+        image = image.convert("RGB")
         action_label, action_probability = action_recognition(image, annotator)
         return action_label, action_probability
 

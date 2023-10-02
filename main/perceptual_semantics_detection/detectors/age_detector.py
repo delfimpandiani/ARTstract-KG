@@ -66,6 +66,7 @@ def process_folder(annotation_situation, folder_path, output_file):
               Tuple[int, float]: The estimated age tier index and the predicted class probability.
         """
         image = Image.open(image_path)
+        image = image.convert("RGB")
         inputs = transforms(image, return_tensors='pt')
         output = model(**inputs)
 

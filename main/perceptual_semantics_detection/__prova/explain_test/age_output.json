@@ -1,0 +1,38 @@
+{
+  "hk_triumph_2": {
+    "age": {
+      "ARTstract_age_2023_06_26": {
+        "age_tier": "20-29",
+        "conceptnet_concept": "conceptnet:twenties",
+        "annotation_strength": 0.38224753737449646
+      }
+    }
+  },
+  "delacroix": {
+    "age": {
+      "ARTstract_age_2023_06_26": {
+        "age_tier": "20-29",
+        "conceptnet_concept": "conceptnet:twenties",
+        "annotation_strength": 0.4397295117378235
+      }
+    }
+  },
+  "hk_triumph": {
+    "age": {
+      "ARTstract_age_2023_06_26": {
+        "age_tier": "20-29",
+        "conceptnet_concept": "conceptnet:twenties",
+        "annotation_strength": 0.30165788531303406
+      }
+    }
+  },
+  "triumph": {
+    "age": {
+      "ARTstract_age_2023_06_26": {
+        "age_tier": "30-39",
+        "conceptnet_concept": "conceptnet:thirties",
+        "annotation_strength": 0.304028183221817
+      }
+    }
+  }
+}

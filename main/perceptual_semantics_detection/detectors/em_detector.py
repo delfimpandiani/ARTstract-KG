@@ -69,6 +69,8 @@ def process_folder(annotation_situation, folder_path, output_file):
         ])
 
         image = Image.open(image_path)
+        image = image.convert("RGB")
+
         # Move the preprocessed image to the appropriate device (GPU or CPU)
         # Pass the image through the model and get the prediction
         with torch.no_grad():

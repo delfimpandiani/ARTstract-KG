@@ -1,0 +1,38 @@
+{
+  "hk_triumph_2": {
+    "act": {
+      "ARTstract_act_2023_06_28": {
+        "action_label": "dancing",
+        "conceptnet_concept": "conceptnet:dancing",
+        "annotation_strength": 0.9177259206771851
+      }
+    }
+  },
+  "delacroix": {
+    "act": {
+      "ARTstract_act_2023_06_28": {
+        "action_label": "dancing",
+        "conceptnet_concept": "conceptnet:dancing",
+        "annotation_strength": 0.9963849782943726
+      }
+    }
+  },
+  "hk_triumph": {
+    "act": {
+      "ARTstract_act_2023_06_28": {
+        "action_label": "dancing",
+        "conceptnet_concept": "conceptnet:dancing",
+        "annotation_strength": 0.9961155652999878
+      }
+    }
+  },
+  "triumph": {
+    "act": {
+      "ARTstract_act_2023_06_28": {
+        "action_label": "sleeping",
+        "conceptnet_concept": "conceptnet:sleeping",
+        "annotation_strength": 0.9417657256126404
+      }
+    }
+  }
+}

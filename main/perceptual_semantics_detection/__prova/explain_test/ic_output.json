@@ -1,0 +1,30 @@
+{
+  "hk_triumph_2": {
+    "ic": {
+      "ARTstract_ic_2023_06_28": {
+        "image_description": "painting of a group of people holding flags and standing on a hill"
+      }
+    }
+  },
+  "delacroix": {
+    "ic": {
+      "ARTstract_ic_2023_06_28": {
+        "image_description": "painting of a woman holding a flag on top of a hill"
+      }
+    }
+  },
+  "hk_triumph": {
+    "ic": {
+      "ARTstract_ic_2023_06_28": {
+        "image_description": "painting of a woman holding a child in a crowded area"
+      }
+    }
+  },
+  "triumph": {
+    "ic": {
+      "ARTstract_ic_2023_06_28": {
+        "image_description": "painting of a group of people in a room with a painting of a woman"
+      }
+    }
+  }
+}

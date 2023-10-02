@@ -1,0 +1,38 @@
+{
+  "hk_triumph_2": {
+    "as": {
+      "ARTstract_as_2023_06_26": {
+        "art_style": "Surrealism",
+        "conceptnet_concept": "conceptnet:surrealism",
+        "annotation_strength": 0.8548154830932617
+      }
+    }
+  },
+  "delacroix": {
+    "as": {
+      "ARTstract_as_2023_06_26": {
+        "art_style": "Surrealism",
+        "conceptnet_concept": "conceptnet:surrealism",
+        "annotation_strength": 0.4652227461338043
+      }
+    }
+  },
+  "hk_triumph": {
+    "as": {
+      "ARTstract_as_2023_06_26": {
+        "art_style": "Romanticism",
+        "conceptnet_concept": "conceptnet:romanticism",
+        "annotation_strength": 0.3455085754394531
+      }
+    }
+  },
+  "triumph": {
+    "as": {
+      "ARTstract_as_2023_06_26": {
+        "art_style": "Renaissance",
+        "conceptnet_concept": "conceptnet:renaissance",
+        "annotation_strength": 0.8138816952705383
+      }
+    }
+  }
+}

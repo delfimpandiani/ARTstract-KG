@@ -78,12 +78,13 @@ def process_folder(annotation_situation, folder_path, output_file):
             image = Image.open(image_path)
             if image.mode != "RGB":
                 image = image.convert(mode="RGB")
+            device = torch.device("cuda" if torch.cuda.is_available() else "cpu")
 
             processor = BlipProcessor.from_pretrained(annotator)
-            model = BlipForConditionalGeneration.from_pretrained(annotator).to("cuda")
+            model = BlipForConditionalGeneration.from_pretrained(annotator).to(device)
 
             text = ""
-            inputs = processor(image, text, return_tensors="pt").to("cuda")
+            inputs = processor(image, text, return_tensors="pt").to(device)
 
             out = model.generate(**inputs)
             pred = processor.decode(out[0], skip_special_tokens=True)

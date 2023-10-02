@@ -38,13 +38,13 @@ with open('input/annotation_situations.json', 'r') as file:
 
 for annotation_key, annotation_situation in annotation_situations.items():
     detection_type = annotation_situation["annotation_type"]
-    folder_path = '../__prova/explain_test'
+    folder_path = '__prova/explain_test'
     # output_file = f'test/{annotation_situation["annotation_type"]}_output.json'
     # output_short_file = f'../{annotation_situation["annotation_type"]}_output_short.json'
     # call_process_folder(detection_type, annotation_situation, folder_path, output_file)
-    output_file = f'test/explain_test/{annotation_situation["annotation_type"]}_output.json'
+    output_file = f'__prova/explain_test/{annotation_situation["annotation_type"]}_output.json'
     # output_short_file = f'../{annotation_situation["annotation_type"]}_output_short.json'
     call_process_folder(detection_type, annotation_situation, folder_path, output_file)
-
-    detect_for_all_classes(annotation_situation)
+    print('doing annotation of type ', detection_type)
+    # detect_for_all_classes(annotation_situation)
 
