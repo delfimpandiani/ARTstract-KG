@@ -1,6 +1,5 @@
 {
     "danger": {
-        "top_thresh_relevant_actions_by_concept": [],
         "top_relevant_art_styles_by_concept": [
             "Art Nouveau",
             "Surrealism",
@@ -83,7 +82,6 @@
         ]
     },
     "death": {
-        "top_thresh_relevant_actions_by_concept": [],
         "top_relevant_art_styles_by_concept": [
             "Art Nouveau",
             "Expressionism",
@@ -155,7 +153,6 @@
         ]
     },
     "power": {
-        "top_thresh_relevant_actions_by_concept": [],
         "top_relevant_art_styles_by_concept": [
             "Art Nouveau",
             "Renaissance",
@@ -222,7 +219,6 @@
         ]
     },
     "safety": {
-        "top_thresh_relevant_actions_by_concept": [],
         "top_relevant_art_styles_by_concept": [
             "Art Nouveau",
             "Surrealism",
@@ -292,7 +288,6 @@
         ]
     },
     "fitness": {
-        "top_thresh_relevant_actions_by_concept": [],
         "top_relevant_art_styles_by_concept": [
             "Art Nouveau",
             "Expressionism",
@@ -356,7 +351,6 @@
         ]
     },
     "freedom": {
-        "top_thresh_relevant_actions_by_concept": [],
         "top_relevant_art_styles_by_concept": [
             "Art Nouveau",
             "Surrealism",
@@ -420,7 +414,6 @@
         ]
     },
     "comfort": {
-        "top_thresh_relevant_actions_by_concept": [],
         "top_relevant_art_styles_by_concept": [
             "Impressionism",
             "Art Nouveau",

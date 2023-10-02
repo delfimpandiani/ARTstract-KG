@@ -18,6 +18,7 @@ from nltk.stem import PorterStemmer, WordNetLemmatizer
 from nltk.tokenize import word_tokenize
 from wordcloud import WordCloud, get_single_color_func
 from collections import defaultdict
+from itertools import combinations
 
 matplotlib.use('Agg')
 plt.interactive(False)
@@ -635,6 +636,240 @@ def object_co_occurence_heatmaps(ACs_list_names, consider_person):
         print('updated cooccur matrix', co_occurrence_matrix)
         return co_occurrence_matrix, object_names
 
+    def get_co_occurrence_pairs(concept_of_interest, concept_detected_objects, consider_person):
+        # Flatten the list of lists to get all detected object names
+        all_object_names = [obj_name for sublist in concept_detected_objects for obj_name in sublist]
+
+        # If consider_person is False, remove 'person' from the object names
+        if not consider_person:
+            all_object_names = [obj_name for obj_name in all_object_names if obj_name != 'person']
+
+        # Count the total number of images for the concept
+        total_images = len(concept_detected_objects)
+
+        # Initialize an empty dictionary to store co-occurrence percentages
+        co_occurrence_percentages = {}
+
+        # Populate the co-occurrence percentages based on the flattened list
+        for detected_objects in concept_detected_objects:
+            if not consider_person:
+                detected_objects = [obj_name for obj_name in detected_objects if obj_name != 'person']
+            for obj_name in detected_objects:
+                for other_obj_name in detected_objects:
+                    if obj_name != other_obj_name:
+                        # Sort the objects alphabetically to ensure consistent ordering
+                        co_occurrence_pair = tuple(sorted([obj_name, other_obj_name]))
+
+                        # Increase the count for the co-occurrence pair
+                        co_occurrence_percentages[co_occurrence_pair] = co_occurrence_percentages.get(
+                            co_occurrence_pair, 0) + 1
+
+        # Convert counts to percentages by dividing by the total number of images
+        for pair, count in co_occurrence_percentages.items():
+            co_occurrence_percentages[pair] = round(count / total_images * 100, 2)
+
+        # Sort the co-occurrence pairs by percentage in descending order
+        sorted_co_occurrence_pairs = sorted(co_occurrence_percentages.items(), key=lambda x: x[1], reverse=True)
+
+        # Create a dictionary with the concept of interest as the key
+        concept_co_occurrences_normalized = {concept_of_interest: sorted_co_occurrence_pairs}
+
+        # Load existing data from the JSON file if it exists
+        try:
+            with open('object_co_occurrences_normalized.json', 'r') as json_file:
+                data = json.load(json_file)
+        except FileNotFoundError:
+            data = {}
+
+        # Update the data with the new co-occurrence information
+        data.update(concept_co_occurrences_normalized)
+
+        # Save the updated data to the JSON file
+        with open('object_co_occurrences_normalized.json', 'w') as json_file:
+            json.dump(data, json_file, indent=4)
+
+        return concept_co_occurrences_normalized
+
+    def get_co_occurrence_triples(concept_of_interest, concept_detected_objects, consider_person):
+        # Flatten the list of lists to get all detected object names
+        all_object_names = [obj_name for sublist in concept_detected_objects for obj_name in sublist]
+
+        # If consider_person is False, remove 'person' from the object names
+        if not consider_person:
+            all_object_names = [obj_name for obj_name in all_object_names if obj_name != 'person']
+
+        # Count the total number of images for the concept
+        total_images = len(concept_detected_objects)
+
+        # Initialize an empty dictionary to store co-occurrence percentages
+        co_occurrence_percentages = {}
+
+        # Populate the co-occurrence percentages based on the flattened list
+        for detected_objects in concept_detected_objects:
+            if not consider_person:
+                detected_objects = [obj_name for obj_name in detected_objects if obj_name != 'person']
+
+            # Generate combinations of three object names
+            triples = combinations(detected_objects, 3)
+
+            for triple in triples:
+                # Sort the objects in the triple alphabetically to ensure consistent ordering
+                sorted_triple = tuple(sorted(triple))
+
+                # Increase the count for the co-occurrence triple
+                co_occurrence_percentages[sorted_triple] = co_occurrence_percentages.get(sorted_triple, 0) + 1
+
+        # Convert counts to percentages by dividing by the total number of images
+        for triple, count in co_occurrence_percentages.items():
+            co_occurrence_percentages[triple] = round(count / total_images * 100, 2)
+
+        # Sort the co-occurrence triples by percentage in descending order
+        sorted_co_occurrence_triples = sorted(co_occurrence_percentages.items(), key=lambda x: x[1], reverse=True)
+
+        # Create a dictionary with the concept of interest as the key
+        concept_co_occurrence_triples_normalized = {concept_of_interest: sorted_co_occurrence_triples}
+
+        # Load existing data from the JSON file if it exists
+        try:
+            with open('object_co_occurrence_triples_normalized.json', 'r') as json_file:
+                data = json.load(json_file)
+        except FileNotFoundError:
+            data = {}
+
+        # Update the data with the new co-occurrence triple information
+        data.update(concept_co_occurrence_triples_normalized)
+
+        # Save the updated data to the JSON file
+        with open('object_co_occurrence_triples_normalized.json', 'w') as json_file:
+            json.dump(data, json_file, indent=4)
+
+        return concept_co_occurrence_triples_normalized
+
+    def get_co_occurrence_pairs(concept_of_interest, concept_detected_objects, consider_person):
+        # Flatten the list of lists to get all detected object names
+        all_object_names = [obj_name for sublist in concept_detected_objects for obj_name in sublist]
+
+        # If consider_person is False, remove 'person' from the object names
+        if not consider_person:
+            all_object_names = [obj_name for obj_name in all_object_names if obj_name != 'person']
+
+        # Count the total number of images related to the concept
+        total_images = len(concept_detected_objects)
+
+        # Initialize an empty dictionary to count co-occurrences
+        co_occurrence_counts = {}
+
+        # Populate the co-occurrence counts based on the flattened list
+        for detected_objects in concept_detected_objects:
+            if not consider_person:
+                detected_objects = [obj_name for obj_name in detected_objects if obj_name != 'person']
+            for obj_name in detected_objects:
+                for other_obj_name in detected_objects:
+                    if obj_name != other_obj_name:
+                        # Create a tuple to represent the co-occurrence quadruple
+                        co_occurrence_pair = tuple(sorted([obj_name, other_obj_name]))
+
+                        # Increase the count for the co-occurrence quadruple
+                        co_occurrence_counts[co_occurrence_pair] = co_occurrence_counts.get(
+                            co_occurrence_pair, 0) + 1
+
+        # Calculate the percentage of each co-occurrence quadruple
+        co_occurrence_percentages = {
+            pair: (count / total_images) * 100
+            for pair, count in co_occurrence_counts.items()
+        }
+
+        # Sort the co-occurrence quadruples by percentage in descending order
+        sorted_co_occurrence_pairs = sorted(co_occurrence_percentages.items(), key=lambda x: x[1], reverse=True)
+
+        # # Print the sorted co-occurrence quadruples
+        # print(f'Co-occurrence pairs for {concept_of_interest}')
+        # for quadruple, percentage in sorted_co_occurrence_pairs:
+        #     print(f"Pairs: {quadruple}, Percentage: {percentage:.2f}%")
+
+
+        co_occurrence_dict = {}
+        for quadruple, percentage in sorted_co_occurrence_pairs:
+            co_occurrence_dict["_".join(quadruple)] = percentage
+
+        # Load existing data from the JSON file if it exists
+        try:
+            with open('object_co_occurrences_pairs.json', 'r') as json_file:
+                data = json.load(json_file)
+        except FileNotFoundError:
+            data = {}
+
+        # Update the data with the new co-occurrence information
+        data.update(co_occurrence_dict)
+
+        # Save the updated data to the JSON file
+        with open('object_co_occurrences_pairs.json', 'w') as json_file:
+            json.dump(data, json_file, indent=4)
+
+        return sorted_co_occurrence_pairs
+
+    def get_co_occurrence_quadruples(concept_of_interest, concept_detected_objects, consider_person):
+        # Flatten the list of lists to get all detected object names
+        all_object_names = [obj_name for sublist in concept_detected_objects for obj_name in sublist]
+
+        # If consider_person is False, remove 'person' from the object names
+        if not consider_person:
+            all_object_names = [obj_name for obj_name in all_object_names if obj_name != 'person']
+
+        # Count the total number of images related to the concept
+        total_images = len(concept_detected_objects)
+
+        # Initialize an empty dictionary to count co-occurrences
+        co_occurrence_counts = {}
+
+        # Populate the co-occurrence counts based on the flattened list
+        for detected_objects in concept_detected_objects:
+            if not consider_person:
+                detected_objects = [obj_name for obj_name in detected_objects if obj_name != 'person']
+
+            # Generate all unique quadruples from detected objects
+            unique_quadruples = set(itertools.combinations(sorted(detected_objects), 4))
+
+            for quadruple in unique_quadruples:
+                # Increase the count for the co-occurrence quadruple
+                co_occurrence_counts[quadruple] = co_occurrence_counts.get(quadruple, 0) + 1
+
+        # Calculate the percentage of each co-occurrence quadruple
+        co_occurrence_percentages = {
+            quadruple: (count / total_images) * 100
+            for quadruple, count in co_occurrence_counts.items()
+        }
+
+        # Sort the co-occurrence quadruples by percentage in descending order
+        sorted_co_occurrence_quadruples = sorted(co_occurrence_percentages.items(), key=lambda x: x[1], reverse=True)
+        # Print the sorted co-occurrence quadruples
+        print(f'Co-occurrence quadruples for {concept_of_interest}')
+        for quadruple, percentage in sorted_co_occurrence_quadruples:
+            print(f"Quadruple: {quadruple}, Percentage: {percentage:.2f}%")
+
+
+
+
+        co_occurrence_dict = {}
+        for quadruple, percentage in sorted_co_occurrence_quadruples:
+            co_occurrence_dict["_".join(quadruple)] = percentage
+
+        # Load existing data from the JSON file if it exists
+        try:
+            with open('object_co_occurrences_quadruples.json', 'r') as json_file:
+                data = json.load(json_file)
+        except FileNotFoundError:
+            data = {}
+
+        # Update the data with the new co-occurrence information
+        data.update(co_occurrence_dict)
+
+        # Save the updated data to the JSON file
+        with open('object_co_occurrences_quadruples.json', 'w') as json_file:
+            json.dump(data, json_file, indent=4)
+
+        return sorted_co_occurrence_quadruples
+
     def create_heatmap(concept_of_interest, co_occurrence_matrix, object_names):
         # Create a heatmap using seaborn
         plt.figure(figsize=(12, 10))
@@ -667,8 +902,13 @@ def object_co_occurence_heatmaps(ACs_list_names, consider_person):
             if concept_name and detected_objects:
                 concept_detected_objects.append(detected_objects)
 
-        co_occurrence_matrix, object_names = create_co_occurrence_matrix(concept_detected_objects, consider_person)
-        create_heatmap(concept_of_interest, co_occurrence_matrix, object_names)
+        # co_occurrence_matrix, object_names = create_co_occurrence_matrix(concept_detected_objects, consider_person)
+        # create_heatmap(concept_of_interest, co_occurrence_matrix, object_names)
+
+        print("co occurrence for ", concept_of_interest)
+        get_co_occurrence_pairs(concept_of_interest, concept_detected_objects, consider_person)
+        # get_co_occurrence_triples(concept_of_interest, concept_detected_objects, consider_person)
+        # get_co_occurrence_quadruples(concept_of_interest, concept_detected_objects, consider_person)
 
     concepts_of_interest = ['comfort', 'danger', 'death', 'fitness', 'freedom', 'power', 'safety']
     for concept_of_interest in concepts_of_interest:
@@ -2806,7 +3046,7 @@ plot_type = "bar"
 ### Detected objects
 # stats_num_detected_objects(ACs_list_names, dataset_colors, concept_colors, plot_type)
 # stats_detected_objects(ACs_list_names)
-# object_co_occurence_heatmaps(ACs_list_names, consider_person=False)
+object_co_occurence_heatmaps(ACs_list_names, consider_person=False)
 
 ### Image captions
 # stats_image_captions(ACs_list_names)
@@ -2826,7 +3066,7 @@ plot_type = "bar"
 # stats_art_style(ACs_list_names)
 
 ### Actions
-stats_action(ACs_list_names)
+# stats_action(ACs_list_names)
 
 ## Human Presence
 # stats_hp(ACs_list_names)
