@@ -16,14 +16,7 @@ situannotate = Namespace("https://w3id.org/situannotate#")
 g = Graph()
 
 ### Create triples for Annotation Situation Descriptions
-g.add((situannotate["act_detection_desc"], rdf.type, situannotate.ImageAnnotationDescription))
-g.add((situannotate["age_detection_desc"], rdf.type, situannotate.ImageAnnotationDescription))
-g.add((situannotate["as_detection_desc"], rdf.type, situannotate.ImageAnnotationDescription))
-g.add((situannotate["color_detection_desc"], rdf.type, situannotate.ImageAnnotationDescription))
-g.add((situannotate["em_detection_desc"], rdf.type, situannotate.ImageAnnotationDescription))
-g.add((situannotate["ic_detection_desc"], rdf.type, situannotate.ImageAnnotationDescription))
-g.add((situannotate["hp_detection_desc"], rdf.type, situannotate.ImageAnnotationDescription))
-g.add((situannotate["od_detection_desc"], rdf.type, situannotate.ImageAnnotationDescription))
+g.add((situannotate["ac_visual_evocation"], rdf.type, situannotate.ImageAnnotationDescription))
 
 ## add comments for the Annotation Situation Descriptions
 g.add((situannotate["act_detection_desc"], rdfs.comment, Literal("Action detections are annotation situations in which annotations play the role of detected_action, assigned by an Annotator according to a certain detection threshold or heuristic", datatype=XSD.string)))
