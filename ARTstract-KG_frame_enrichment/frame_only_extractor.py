@@ -37,7 +37,7 @@ headers = {
 
 
 # Here you specify the path for your csv with sentences to be analyzed. Include the sep="\t" if using a .tsv file
-doc = pd.read_csv('output_small.tsv', sep="\t") #, sep="\t")
+doc = pd.read_csv('output.tsv', sep="\t") #, sep="\t")
 
 
 # Here you introduce a variable which will be used to avoid timeout in FRED calls
