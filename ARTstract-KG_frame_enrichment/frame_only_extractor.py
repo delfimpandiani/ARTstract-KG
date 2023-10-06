@@ -26,7 +26,7 @@ import time
 # Here you use the api keys for FRED. Use the already included Bearer key.
 headers = {
     'accept': 'text/turtle',
-    'Authorization': 'Bearer b67a0577-8c76-3889-89b2-cf3dceab4a0e',
+
 }
 
 
